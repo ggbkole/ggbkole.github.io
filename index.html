@@ -60,16 +60,9 @@
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             position: relative;
             z-index: 10;
-            /* animation: shake 0.5s ease-in-out infinite alternate; */
-        }
-
-        @keyframes shake {
-            from { transform: translateX(-2px); }
-            to { transform: translateX(2px); }
         }
 
         .container:hover {
-            animation: shake 0.1s ease-in-out infinite alternate;
             border: 3px dashed #ff6b6b;
         }
 
@@ -601,6 +594,17 @@
         let currentQuestion = 0;
         let totalScore = 0;
         let testHistory = [];
+        let shuffledQuestions = [];
+
+        // 随机打乱数组
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
 
         // 初始化
         function init() {
@@ -636,6 +640,8 @@
         function startTest() {
             currentQuestion = 0;
             totalScore = 0;
+            // 随机打乱题目顺序
+            shuffledQuestions = shuffleArray(questions);
             document.querySelector('.start-screen').classList.remove('active');
             document.querySelector('.question-screen').classList.add('active');
             showQuestion();
@@ -643,13 +649,16 @@
 
         // 显示问题
         function showQuestion() {
-            const question = questions[currentQuestion];
+            const question = shuffledQuestions[currentQuestion];
             document.getElementById('questionText').textContent = `${currentQuestion + 1}. ${question.question}`;
             
             const optionsContainer = document.getElementById('optionsContainer');
             optionsContainer.innerHTML = '';
             
-            question.options.forEach((option, index) => {
+            // 随机打乱选项顺序
+            const shuffledOptions = shuffleArray(question.options);
+            
+            shuffledOptions.forEach((option, index) => {
                 const optionDiv = document.createElement('div');
                 optionDiv.className = 'option';
                 optionDiv.textContent = option.text;
