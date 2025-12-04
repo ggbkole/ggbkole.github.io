@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>⚖️ 鸽子审判庭 - 通缉令展示</title>
+    <title>⚖️ 鸽子审判庭 - 云端通缉令</title>
     <style>
         * {
             margin: 0;
@@ -33,6 +33,32 @@
             max-width: 1400px;
             margin: 0 auto;
             position: relative;
+        }
+
+        .sync-status {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(0,0,0,0.8);
+            color: #2ecc71;
+            padding: 10px 15px;
+            border-radius: 10px;
+            border: 2px solid #2ecc71;
+            font-size: 0.9em;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sync-status.syncing {
+            color: #f39c12;
+            border-color: #f39c12;
+        }
+
+        .sync-status.error {
+            color: #e74c3c;
+            border-color: #e74c3c;
         }
 
         .header {
@@ -66,6 +92,19 @@
             color: #e74c3c;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
             font-weight: bold;
+        }
+
+        .cloud-indicator {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+            color: #2ecc71;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
         }
 
         .throw-instruction {
@@ -204,6 +243,12 @@
             transform: scale(1.1) rotate(-2deg);
             background: #c0392b;
             box-shadow: 0 0 20px rgba(231, 76, 60, 0.5);
+        }
+
+        .vote-btn:disabled {
+            background: #7f8c8d;
+            cursor: not-allowed;
+            transform: none;
         }
 
         .image-preview {
@@ -604,6 +649,62 @@
             box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
         }
 
+        .setup-section {
+            background: #2c3e50;
+            border: 3px solid #f39c12;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .setup-title {
+            font-size: 1.8em;
+            color: #f39c12;
+            margin-bottom: 20px;
+        }
+
+        .setup-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .setup-input {
+            padding: 12px;
+            font-size: 1.1em;
+            border: 2px solid #f39c12;
+            border-radius: 8px;
+            background: #34495e;
+            color: white;
+        }
+
+        .setup-btn {
+            padding: 12px 25px;
+            font-size: 1.1em;
+            background: #f39c12;
+            color: white;
+            border: 2px solid #000;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .setup-btn:hover {
+            background: #e67e22;
+            transform: scale(1.05);
+        }
+
+        .help-text {
+            color: #bdc3c7;
+            font-size: 0.9em;
+            margin-top: 10px;
+            line-height: 1.4;
+        }
+
         @media (max-width: 768px) {
             h1 { font-size: 2.5em; }
             .pigeon-list { grid-template-columns: 1fr; }
@@ -625,28 +726,53 @@
             .pigeon-card {
                 padding: 15px;
             }
+            .sync-status {
+                font-size: 0.8em;
+                padding: 8px 12px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <div class="sync-status" id="syncStatus">
+            <span id="syncIcon">🔄</span>
+            <span id="syncText">正在同步...</span>
+        </div>
+
         <div class="throw-counter">
             🍅 番茄: <span id="tomatoCount">0</span> | 🥚 鸡蛋: <span id="eggCount">0</span> | 💩 屎蛋: <span id="shitCount">0</span>
         </div>
 
         <div class="header">
             <h1>⚖️ 鸽子审判庭</h1>
-            <p class="subtitle">记录每一次背叛，展示每一个罪人</p>
+            <p class="subtitle">云端记录，永不删除</p>
+            <div class="cloud-indicator">☁️ 数据已同步到GitHub</div>
             <p class="throw-instruction">🎯 点击屏幕任意位置丢番茄臭鸡蛋！</p>
         </div>
 
-        <div class="nav-tabs">
+        <!-- 初始设置区域 -->
+        <div class="setup-section" id="setupSection">
+            <h2 class="setup-title">🔧 首次设置 - 连接GitHub仓库</h2>
+            <div class="setup-form">
+                <input type="text" id="repoOwner" class="setup-input" placeholder="GitHub用户名" value="">
+                <input type="text" id="repoName" class="setup-input" placeholder="仓库名称" value="">
+                <input type="text" id="githubToken" class="setup-input" placeholder="GitHub Token (可选)" value="">
+                <button class="setup-btn" onclick="setupGitHub()">连接仓库</button>
+                <div class="help-text">
+                    💡 提示：创建一个GitHub仓库，输入用户名和仓库名即可。<br>
+                    Token用于避免API限制，在GitHub Settings > Developer settings > Personal access tokens中创建。
+                </div>
+            </div>
+        </div>
+
+        <div class="nav-tabs" id="navTabs" style="display: none;">
             <button class="tab-btn active" onclick="switchTab('report')">📝 举报罪人</button>
             <button class="tab-btn" onclick="switchTab('vote')">⚖️ 通缉令展示</button>
             <button class="tab-btn" onclick="switchTab('wall')">🔥 羞耻之墙</button>
         </div>
 
-        <div class="stats-section">
+        <div class="stats-section" id="statsSection" style="display: none;">
             <h2>📊 罪恶统计</h2>
             <div class="stats-grid">
                 <div class="stat-item">
@@ -669,7 +795,7 @@
         </div>
 
         <!-- 举报罪人标签页 -->
-        <div id="report-tab" class="tab-content active">
+        <div id="report-tab" class="tab-content">
             <div class="vote-section">
                 <h2>📝 举报新的罪人（上传通缉照片）</h2>
                 <div class="vote-form">
@@ -684,7 +810,7 @@
                             📷 上传罪人照片
                             <input type="file" id="photoUpload" accept="image/*" onchange="previewImage(event)">
                         </label>
-                        <button class="vote-btn" onclick="votePigeon()">⚖️ 定罪！</button>
+                        <button class="vote-btn" id="submitBtn" onclick="votePigeon()">⚖️ 定罪！</button>
                     </div>
                     <div class="image-preview" id="imagePreview"></div>
                 </div>
@@ -721,22 +847,209 @@
     </div>
 
     <script>
-        let pigeons = JSON.parse(localStorage.getItem('pigeons')) || {};
-        let todayVotes = parseInt(localStorage.getItem('todayVotes')) || 0;
-        let lastDate = localStorage.getItem('lastDate') || new Date().toDateString();
+        // 全局变量
+        let pigeons = {};
+        let todayVotes = 0;
+        let lastDate = new Date().toDateString();
         let currentImageData = null;
+        let githubConfig = null;
         
         // 投掷物计数器
         let throwCounts = {
-            tomato: parseInt(localStorage.getItem('tomatoCount')) || 0,
-            egg: parseInt(localStorage.getItem('eggCount')) || 0,
-            shit: parseInt(localStorage.getItem('shitCount')) || 0
+            tomato: 0,
+            egg: 0,
+            shit: 0
         };
 
-        if (new Date().toDateString() !== lastDate) {
-            todayVotes = 0;
-            localStorage.setItem('lastDate', new Date().toDateString());
-            localStorage.setItem('todayVotes', '0');
+        // GitHub API配置
+        const GITHUB_API = 'https://api.github.com';
+        const DATA_FILE = 'pigeon-data.json';
+
+        // 初始化
+        window.onload = function() {
+            loadLocalConfig();
+            if (githubConfig) {
+                showMainInterface();
+                loadDataFromGitHub();
+            }
+        };
+
+        // 加载本地配置
+        function loadLocalConfig() {
+            const saved = localStorage.getItem('githubConfig');
+            if (saved) {
+                githubConfig = JSON.parse(saved);
+                document.getElementById('repoOwner').value = githubConfig.owner || '';
+                document.getElementById('repoName').value = githubConfig.repo || '';
+                document.getElementById('githubToken').value = githubConfig.token || '';
+            }
+        }
+
+        // 设置GitHub连接
+        function setupGitHub() {
+            const owner = document.getElementById('repoOwner').value.trim();
+            const repo = document.getElementById('repoName').value.trim();
+            const token = document.getElementById('githubToken').value.trim();
+
+            if (!owner || !repo) {
+                alert('请输入GitHub用户名和仓库名！');
+                return;
+            }
+
+            githubConfig = { owner, repo, token };
+            localStorage.setItem('githubConfig', JSON.stringify(githubConfig));
+            
+            showMainInterface();
+            loadDataFromGitHub();
+        }
+
+        // 显示主界面
+        function showMainInterface() {
+            document.getElementById('setupSection').style.display = 'none';
+            document.getElementById('navTabs').style.display = 'flex';
+            document.getElementById('statsSection').style.display = 'block';
+        }
+
+        // 从GitHub加载数据
+        async function loadDataFromGitHub() {
+            updateSyncStatus('正在加载数据...', 'syncing');
+            
+            try {
+                const url = `${GITHUB_API}/repos/${githubConfig.owner}/${githubConfig.repo}/contents/${DATA_FILE}`;
+                const response = await fetch(url, {
+                    headers: githubConfig.token ? { 'Authorization': `token ${githubConfig.token}` } : {}
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const content = JSON.parse(atob(data.content));
+                    pigeons = content.pigeons || {};
+                    todayVotes = content.todayVotes || 0;
+                    lastDate = content.lastDate || new Date().toDateString();
+                    throwCounts = content.throwCounts || { tomato: 0, egg: 0, shit: 0 };
+                    
+                    updateDisplay();
+                    updateSyncStatus('数据同步成功', 'success');
+                } else {
+                    // 文件不存在，创建初始数据
+                    await saveDataToGitHub();
+                    updateSyncStatus('创建数据文件成功', 'success');
+                }
+            } catch (error) {
+                console.error('加载数据失败:', error);
+                updateSyncStatus('加载失败，使用本地数据', 'error');
+                // 降级到本地存储
+                loadFromLocalStorage();
+            }
+        }
+
+        // 保存数据到GitHub
+        async function saveDataToGitHub() {
+            if (!githubConfig) return;
+
+            updateSyncStatus('正在保存...', 'syncing');
+
+            try {
+                const data = {
+                    pigeons,
+                    todayVotes,
+                    lastDate,
+                    throwCounts,
+                    updatedAt: new Date().toISOString()
+                };
+
+                // 首先尝试获取文件SHA
+                let sha = null;
+                try {
+                    const getUrl = `${GITHUB_API}/repos/${githubConfig.owner}/${githubConfig.repo}/contents/${DATA_FILE}`;
+                    const getResponse = await fetch(getUrl, {
+                        headers: githubConfig.token ? { 'Authorization': `token ${githubConfig.token}` } : {}
+                    });
+                    if (getResponse.ok) {
+                        const fileData = await getResponse.json();
+                        sha = fileData.sha;
+                    }
+                } catch (e) {
+                    // 文件不存在，继续创建
+                }
+
+                // 创建或更新文件
+                const content = btoa(JSON.stringify(data, null, 2));
+                const url = `${GITHUB_API}/repos/${githubConfig.owner}/${githubConfig.repo}/contents/${DATA_FILE}`;
+                const method = sha ? 'PUT' : 'PUT';
+                
+                const body = {
+                    message: `Update pigeon data - ${new Date().toLocaleString()}`,
+                    content: content
+                };
+
+                if (sha) {
+                    body.sha = sha;
+                }
+
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...(githubConfig.token && { 'Authorization': `token ${githubConfig.token}` })
+                    },
+                    body: JSON.stringify(body)
+                });
+
+                if (response.ok) {
+                    updateSyncStatus('保存成功', 'success');
+                } else {
+                    throw new Error('保存失败');
+                }
+            } catch (error) {
+                console.error('保存数据失败:', error);
+                updateSyncStatus('保存失败，数据仅本地存储', 'error');
+                // 降级到本地存储
+                saveToLocalStorage();
+            }
+        }
+
+        // 更新同步状态
+        function updateSyncStatus(text, status = 'success') {
+            const statusEl = document.getElementById('syncStatus');
+            const iconEl = document.getElementById('syncIcon');
+            const textEl = document.getElementById('syncText');
+
+            statusEl.className = 'sync-status';
+            if (status === 'syncing') {
+                statusEl.classList.add('syncing');
+                iconEl.textContent = '🔄';
+            } else if (status === 'error') {
+                statusEl.classList.add('error');
+                iconEl.textContent = '❌';
+            } else {
+                iconEl.textContent = '✅';
+            }
+            
+            textEl.textContent = text;
+
+            // 3秒后隐藏成功状态
+            if (status === 'success') {
+                setTimeout(() => {
+                    textEl.textContent = '数据已同步';
+                }, 3000);
+            }
+        }
+
+        // 本地存储降级方案
+        function saveToLocalStorage() {
+            localStorage.setItem('pigeons', JSON.stringify(pigeons));
+            localStorage.setItem('todayVotes', todayVotes.toString());
+            localStorage.setItem('lastDate', lastDate);
+            localStorage.setItem('throwCounts', JSON.stringify(throwCounts));
+        }
+
+        function loadFromLocalStorage() {
+            pigeons = JSON.parse(localStorage.getItem('pigeons')) || {};
+            todayVotes = parseInt(localStorage.getItem('todayVotes')) || 0;
+            lastDate = localStorage.getItem('lastDate') || new Date().toDateString();
+            throwCounts = JSON.parse(localStorage.getItem('throwCounts')) || { tomato: 0, egg: 0, shit: 0 };
+            updateDisplay();
         }
 
         // 更新投掷计数器显示
@@ -771,7 +1084,6 @@
             
             // 更新计数器
             throwCounts[type]++;
-            localStorage.setItem(type + 'Count', throwCounts[type].toString());
             updateThrowCounter();
             
             // 创建投掷物元素
@@ -792,9 +1104,6 @@
             setTimeout(() => {
                 thrownObj.remove();
             }, 1000);
-            
-            // 播放音效（如果需要的话）
-            playThrowSound();
         }
 
         // 创建飞溅效果
@@ -813,11 +1122,6 @@
             }, 800);
         }
 
-        // 播放投掷音效（模拟）
-        function playThrowSound() {
-            console.log('💥 投掷音效！');
-        }
-
         // 点击事件监听
         document.addEventListener('click', function(e) {
             // 排除按钮和输入框的点击
@@ -826,7 +1130,8 @@
                 e.target.closest('.tab-btn') ||
                 e.target.closest('.vote-btn') ||
                 e.target.closest('.close-modal') ||
-                e.target.closest('.file-upload')) {
+                e.target.closest('.file-upload') ||
+                e.target.closest('.setup-btn')) {
                 return;
             }
             
@@ -847,7 +1152,7 @@
             }
         }
 
-        function votePigeon() {
+        async function votePigeon() {
             const nameInput = document.getElementById('pigeonName');
             const recordInput = document.getElementById('record');
             const name = nameInput.value.trim();
@@ -858,6 +1163,11 @@
                 return;
             }
 
+            // 禁用按钮防止重复提交
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = '⏳ 定罪中...';
+
             if (!pigeons[name]) {
                 pigeons[name] = {
                     count: 0,
@@ -866,7 +1176,6 @@
                     photo: currentImageData || null
                 };
             } else if (currentImageData && !pigeons[name].photo) {
-                // 如果之前没有照片，现在上传了
                 pigeons[name].photo = currentImageData;
             }
 
@@ -882,9 +1191,8 @@
 
             todayVotes++;
             
-            localStorage.setItem('pigeons', JSON.stringify(pigeons));
-            localStorage.setItem('todayVotes', todayVotes.toString());
-
+            // 保存到GitHub
+            await saveDataToGitHub();
             createBloodEffect();
             checkMilestone(name, pigeons[name].count);
 
@@ -896,10 +1204,15 @@
             currentImageData = null;
 
             updateDisplay();
+
+            // 恢复按钮
+            submitBtn.disabled = false;
+            submitBtn.textContent = '⚖️ 定罪！';
         }
 
         function updateDisplay() {
             updateStats();
+            updateThrowCounter();
         }
 
         function updateVoteList() {
@@ -919,30 +1232,30 @@
             const card = document.createElement('div');
             card.className = 'pigeon-card';
             
-            let title = '🥚 菜鸟罪人';
+            let title = '🥚 初生';
             let guillotine = '';
             let tomato = '';
             let wantedPoster = '';
             
             if (data.count >= 50) {
-                title = '👹 万恶之源';
+                title = '👹 狗东西';
                 guillotine = '<div class="guillotine">⚔️</div>';
                 tomato = '<div class="tomato">🍅</div>';
                 wantedPoster = '<div class="wanted-poster">通缉</div>';
             } else if (data.count >= 30) {
-                title = '💀 罪恶帝王';
+                title = '💀 该死';
                 guillotine = '<div class="guillotine">⚔️</div>';
                 tomato = '<div class="tomato">🍅</div>';
                 wantedPoster = '<div class="wanted-poster">通缉</div>';
             } else if (data.count >= 20) {
-                title = '👿 恶魔化身';
+                title = '👿 千刀万剐';
                 guillotine = '<div class="guillotine">⚔️</div>';
                 wantedPoster = '<div class="wanted-poster">通缉</div>';
             } else if (data.count >= 10) {
-                title = '😈 罪大恶极';
+                title = '😈 下油锅';
                 guillotine = '<div class="guillotine">⚔️</div>';
             } else if (data.count >= 5) {
-                title = '🤡 小丑罪人';
+                title = '🤡 劳资一拳从肛门打到头盖骨';
                 tomato = '<div class="tomato">🍅</div>';
             }
 
@@ -1101,10 +1414,6 @@
         `;
         document.head.appendChild(style);
 
-        // 页面加载时更新显示
-        updateDisplay();
-        updateThrowCounter();
-
         // 添加回车键支持
         document.getElementById('pigeonName').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
@@ -1125,7 +1434,8 @@
                 e.target.closest('.tab-btn') ||
                 e.target.closest('.vote-btn') ||
                 e.target.closest('.close-modal') ||
-                e.target.closest('.file-upload')) {
+                e.target.closest('.file-upload') ||
+                e.target.closest('.setup-btn')) {
                 return;
             }
             
