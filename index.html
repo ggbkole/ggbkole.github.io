@@ -25,10 +25,13 @@
         .input-section input:focus { outline: none; border-color: #DC143C; box-shadow: 0 0 10px rgba(220, 20, 60, 0.3); }
         .checkbox-group { margin: 10px 0; color: #666; font-size: 0.95em; }
         .checkbox-group input[type="checkbox"] { width: auto; margin-right: 5px; }
-        .btn-draw { display: block; margin: 20px auto; padding: 15px 50px; font-size: 1.3em; font-weight: bold; color: white; background: linear-gradient(135deg, #DC143C 0%, #8B0000 100%); border: none; border-radius: 50px; cursor: pointer; box-shadow: 0 5px 15px rgba(220, 20, 60, 0.4); transition: all 0.3s; font-family: inherit; }
+        .btn-draw { display: block; margin: 20px auto; padding: 15px 50px; font-size: 1.3em; font-weight: bold; color: white; background: linear-gradient(135deg, #DC143C 0%, #8B0000 100%); border: none; border-radius: 50px; cursor: pointer; box-shadow: 0 5px 15px rgba(220, 20, 60, 0.4); transition: all 0.3s; font-family: inherit; position: relative; }
         .btn-draw:hover { transform: translateY(-2px); box-shadow: 0 7px 20px rgba(220, 20, 60, 0.6); }
         .btn-draw:active { transform: translateY(0); }
         .btn-draw:disabled { background: #ccc; cursor: not-allowed; }
+        .btn-draw.shaking { animation: shake-bucket 0.3s ease-in-out; }
+        @keyframes shake-bucket { 0%, 100% { transform: translateX(0) rotate(0deg); } 25% { transform: translateX(-10px) rotate(-10deg); } 50% { transform: translateX(10px) rotate(10deg); } 75% { transform: translateX(-10px) rotate(-10deg); } }
+        .shake-count { position: absolute; top: -30px; right: 10px; background: #FFD700; color: #8B0000; padding: 5px 15px; border-radius: 20px; font-size: 0.9em; font-weight: bold; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
         .drawing-animation { text-align: center; display: none; margin: 30px 0; }
         .stick { font-size: 3em; animation: shake 0.5s infinite; display: inline-block; }
         @keyframes shake { 0%, 100% { transform: translateX(0) rotate(0deg); } 25% { transform: translateX(-10px) rotate(-5deg); } 75% { transform: translateX(10px) rotate(5deg); } }
@@ -129,10 +132,12 @@
 
     <script>
         // ====== 配置区域 ======
+        // 注意：请在本地编辑此文件，填写新的Token后上传到GitHub
+        // 不要在浏览器控制台中直接修改CONFIG.token，那样是临时的
         const CONFIG = {
             owner: 'ggbkole',
             repo: 'ggbkole.github.io',
-            token: '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'  // GitHub Personal Access Token
+            token: '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'  
         };
 
         // ====== 50种签文数据 ======
@@ -193,6 +198,9 @@
         let currentFortune = null;
         let currentUserName = '';
         let isAnonymous = false;
+        let shakeCount = 0;
+        let requiredShakes = 0;
+        let allVisitorNames = [];  // 存储所有访客姓名
 
         // ====== 烟花动画 ======
         const canvas = document.getElementById('fireworks');
@@ -279,13 +287,47 @@
                 alert('请先输入您的姓名哦！🎋');
                 return;
             }
+            
+            // 检查是否重复抽签
+            if (allVisitorNames.includes(userName)) {
+                alert(`⚠️ ${userName}，您已经抽过签了哦！\n\n请不要重复抽签，让其他人也有机会祝福哦~ 🎊`);
+                return;
+            }
+            
             isAnonymous = document.getElementById('anonymous').checked;
             currentUserName = userName;
             
-            document.getElementById('inputSection').style.display = 'none';
-            document.getElementById('drawingAnimation').style.display = 'block';
+            // 初始化摇签计数
+            shakeCount = 0;
+            requiredShakes = Math.floor(Math.random() * 11) + 10;  // 10-20次随机
             
-            setTimeout(() => showResult(), 2000);
+            const btn = document.querySelector('.btn-draw');
+            btn.innerHTML = `🎋 摇一摇签筒 <span class="shake-count">0/${requiredShakes}</span>`;
+            btn.onclick = shakeBucket;
+        }
+        
+        function shakeBucket() {
+            shakeCount++;
+            const btn = document.querySelector('.btn-draw');
+            const countSpan = btn.querySelector('.shake-count');
+            
+            // 添加摇动动画
+            btn.classList.add('shaking');
+            setTimeout(() => btn.classList.remove('shaking'), 300);
+            
+            // 更新计数
+            countSpan.textContent = `${shakeCount}/${requiredShakes}`;
+            
+            // 判断是否达到摇签次数
+            if (shakeCount >= requiredShakes) {
+                btn.disabled = true;
+                btn.innerHTML = '🎋 签文即将显示...';
+                
+                document.getElementById('inputSection').style.display = 'none';
+                document.getElementById('drawingAnimation').style.display = 'block';
+                
+                setTimeout(() => showResult(), 2000);
+            }
         }
 
         function showResult() {
@@ -318,6 +360,13 @@
             document.getElementById('userName').value = '';
             document.getElementById('blessing').value = '';
             document.getElementById('anonymous').checked = false;
+            
+            // 重置按钮
+            const btn = document.querySelector('.btn-draw');
+            btn.innerHTML = '🎋 开始抽签';
+            btn.onclick = startDraw;
+            btn.disabled = false;
+            
             document.getElementById('userName').focus();
         }
 
@@ -334,7 +383,7 @@
             }
 
             const blessing = document.getElementById('blessing').value.trim();
-            const displayName = isAnonymous ? '匿名善信' : maskName(currentUserName);
+            const displayName = isAnonymous ? '匿名善信' : currentUserName;  // 修改：显示完整姓名
             const title = `${displayName} - ${currentFortune.level} - ${formatTime(new Date())}`;
             const body = `**姓名**: ${displayName}
 **签文**: ${currentFortune.level} - ${currentFortune.type}
@@ -423,6 +472,7 @@ ${blessing ? `**祝福**: ${blessing}
                 
                 if (!issues || issues.length === 0) {
                     list.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">暂无访客记录</p>';
+                    allVisitorNames = [];  // 清空访客名单
                     return;
                 }
                 
@@ -430,10 +480,12 @@ ${blessing ? `**祝福**: ${blessing}
                 if (issues.message) {
                     console.error('GitHub API错误:', issues);
                     list.innerHTML = `<p style="text-align:center;color:#DC143C;padding:20px;">⚠️ ${issues.message}</p>`;
+                    allVisitorNames = [];  // 清空访客名单
                     return;
                 }
                 
                 let stats = { total: issues.length, lucky: 0 };
+                allVisitorNames = [];  // 重置访客名单
                 
                 list.innerHTML = issues.map(issue => {
                     // 尝试解析标题格式： 姓名 - 签文 - 时间
@@ -453,6 +505,11 @@ ${blessing ? `**祝福**: ${blessing}
                     const fortune = match[2];
                     const time = match[3];
                     
+                    // 收集访客名字（排除匿名和重复）
+                    if (name !== '匿名善信' && !allVisitorNames.includes(name)) {
+                        allVisitorNames.push(name);
+                    }
+                    
                     if (fortune.includes('上吉签') || fortune.includes('上上签')) {
                         stats.lucky++;
                     }
@@ -469,6 +526,8 @@ ${blessing ? `**祝福**: ${blessing}
                         </div>
                     `;
                 }).join('');
+                
+                console.log('已收集到的访客名单:', allVisitorNames);
                 
                 document.getElementById('totalCount').textContent = stats.total;
                 document.getElementById('luckyCount').textContent = stats.lucky;
