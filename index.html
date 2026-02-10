@@ -113,6 +113,13 @@
 
         <div class="visitor-wall">
             <h2>🎊 访客祈福墙 🎊</h2>
+            <div class="error-msg" id="tokenError" style="display: none;">
+                <strong>⚠️ GitHub Token 未配置</strong><br>
+                <small>访客记录功能需要 GitHub Token。请按照以下步骤：<br>
+                1. <a href="https://github.com/settings/tokens/new" target="_blank" style="color: #DC143C; text-decoration: underline;">创建 Token</a> 并勾选 <strong>public_repo</strong> 权限<br>
+                2. 复制Token后，编辑HTML文件第128行，填入：<code>token: '你的Token'</code><br>
+                3. 保存文件并重新上传到GitHub，然后刷新页面</small>
+            </div>
             <div class="loading" id="wallLoading">加载访客记录中...</div>
             <div class="visitor-list" id="visitorList"></div>
         </div>
@@ -125,7 +132,7 @@
         const CONFIG = {
             owner: 'ggbkole',
             repo: 'ggbkole.github.io',
-            token: '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'
+            token: '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'  // GitHub Personal Access Token
         };
 
         // ====== 50种签文数据 ======
@@ -318,6 +325,7 @@
         async function saveToGitHub() {
             if (!CONFIG.token) {
                 console.log('未配置GitHub Token，跳过保存');
+                document.getElementById('tokenError').style.display = 'block';
                 return;
             }
 
@@ -338,7 +346,7 @@ ${blessing ? `**祝福**: ${blessing}
 🏮 新春祈福抽签 🏮`;
 
             try {
-                await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/issues`, {
+                const response = await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/issues`, {
                     method: 'POST',
                     headers: {
                         'Authorization': `token ${CONFIG.token}`,
@@ -350,9 +358,26 @@ ${blessing ? `**祝福**: ${blessing}
                         labels: ['新春抽签', '龙年祈福']
                     })
                 });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    console.error('GitHub API错误:', response.status, errorData);
+                    
+                    if (response.status === 401) {
+                        alert('⚠️ GitHub Token认证失败！\n\n可能原因：\n1. Token已过期或被撤销\n2. Token权限不足（需要public_repo权限）\n3. Token格式错误\n\n请重新创建Token并配置');
+                    } else if (response.status === 403) {
+                        alert('⚠️ GitHub API访问被拒绝！\n\n可能原因：\n1. API速率限制（请稍后再试）\n2. Token权限不足');
+                    } else {
+                        alert(`⚠️ 保存失败：${errorData.message || '未知错误'}`);
+                    }
+                    return;
+                }
+                
+                console.log('保存成功！');
                 loadVisitors();
             } catch (e) {
                 console.error('保存失败:', e);
+                alert(`⚠️ 网络错误：${e.message}`);
             }
         }
 
@@ -361,21 +386,48 @@ ${blessing ? `**祝福**: ${blessing}
             const list = document.getElementById('visitorList');
             
             try {
-                const res = await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/issues?labels=新春抽签&state=all&per_page=20&sort=created&direction=desc`);
-                const issues = await res.json();
+                // 先尝试加载带标签的Issues，如果没有则加载所有Issues
+                let res = await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/issues?labels=新春抽签&state=all&per_page=20&sort=created&direction=desc`);
+                let issues = await res.json();
+                
+                // 如果没有带标签的Issues，则加载所有Issues
+                if (!issues || issues.length === 0) {
+                    console.log('未找到带标签的Issues，尝试加载所有Issues');
+                    res = await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/issues?state=all&per_page=20&sort=created&direction=desc`);
+                    issues = await res.json();
+                }
                 
                 loading.style.display = 'none';
                 
-                if (issues.length === 0) {
+                console.log('加载到的Issues数量:', issues.length);
+                
+                if (!issues || issues.length === 0) {
                     list.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">暂无访客记录</p>';
+                    return;
+                }
+                
+                // 处理错误响应
+                if (issues.message) {
+                    console.error('GitHub API错误:', issues);
+                    list.innerHTML = `<p style="text-align:center;color:#DC143C;padding:20px;">⚠️ ${issues.message}</p>`;
                     return;
                 }
                 
                 let stats = { total: issues.length, lucky: 0 };
                 
                 list.innerHTML = issues.map(issue => {
+                    // 尝试解析标题格式： 姓名 - 签文 - 时间
                     const match = issue.title.match(/(.*?)\s-\s(.*?)\s-\s(.*)/);
-                    if (!match) return '';
+                    if (!match) {
+                        // 如果格式不匹配，显示原始标题
+                        console.log('格式不匹配的Issue:', issue.title);
+                        return `
+                            <div class="visitor-item">
+                                <div class="visitor-name">${issue.title}</div>
+                                <div class="visitor-time">🕐 ${new Date(issue.created_at).toLocaleString('zh-CN')}</div>
+                            </div>
+                        `;
+                    }
                     
                     const name = match[1];
                     const fortune = match[2];
@@ -385,7 +437,7 @@ ${blessing ? `**祝福**: ${blessing}
                         stats.lucky++;
                     }
                     
-                    const blessingMatch = issue.body.match(/\*\*祝福\*\*:\s*(.+)/);
+                    const blessingMatch = issue.body && issue.body.match(/\*\*祝福\*\*:\s*(.+)/);
                     const blessing = blessingMatch ? blessingMatch[1] : '';
                     
                     return `
