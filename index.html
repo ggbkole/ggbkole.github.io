@@ -25,13 +25,152 @@
         .input-section input:focus { outline: none; border-color: #DC143C; box-shadow: 0 0 10px rgba(220, 20, 60, 0.3); }
         .checkbox-group { margin: 10px 0; color: #666; font-size: 0.95em; }
         .checkbox-group input[type="checkbox"] { width: auto; margin-right: 5px; }
-        .btn-draw { display: block; margin: 20px auto; padding: 15px 50px; font-size: 1.3em; font-weight: bold; color: white; background: linear-gradient(135deg, #DC143C 0%, #8B0000 100%); border: none; border-radius: 50px; cursor: pointer; box-shadow: 0 5px 15px rgba(220, 20, 60, 0.4); transition: all 0.3s; font-family: inherit; position: relative; }
-        .btn-draw:hover { transform: translateY(-2px); box-shadow: 0 7px 20px rgba(220, 20, 60, 0.6); }
-        .btn-draw:active { transform: translateY(0); }
-        .btn-draw:disabled { background: #ccc; cursor: not-allowed; }
-        .btn-draw.shaking { animation: shake-bucket 0.3s ease-in-out; }
-        @keyframes shake-bucket { 0%, 100% { transform: translateX(0) rotate(0deg); } 25% { transform: translateX(-10px) rotate(-10deg); } 50% { transform: translateX(10px) rotate(10deg); } 75% { transform: translateX(-10px) rotate(-10deg); } }
-        .shake-count { position: absolute; top: -30px; right: 10px; background: #FFD700; color: #8B0000; padding: 5px 15px; border-radius: 20px; font-size: 0.9em; font-weight: bold; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+        .btn-draw {
+            display: block;
+            margin: 30px auto;
+            width: 180px;
+            height: 220px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            background: transparent;
+            padding: 0;
+        }
+        /* 签筒本体 */
+        .bucket {
+            width: 100%;
+            height: 180px;
+            background: linear-gradient(180deg, #8B4513 0%, #654321 50%, #8B4513 100%);
+            border-radius: 20px 20px 40px 40px;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3), inset 0 -5px 15px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        /* 签筒金边 */
+        .bucket::before {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            height: 15px;
+            background: linear-gradient(90deg, #DAA520, #FFD700, #DAA520);
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        .bucket::after {
+            content: '';
+            position: absolute;
+            bottom: 30px;
+            left: 10px;
+            right: 10px;
+            height: 15px;
+            background: linear-gradient(90deg, #DAA520, #FFD700, #DAA520);
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        /* 签文插在签筒里 */
+        .sticks {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 140px;
+            height: 120px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 3px;
+        }
+        .stick {
+            width: 12px;
+            height: 100px;
+            background: linear-gradient(180deg, #FFF8DC 0%, #F5DEB3 100%);
+            border-radius: 2px 2px 0 0;
+            position: relative;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .stick:nth-child(1) { height: 110px; transform: rotate(-5deg); }
+        .stick:nth-child(2) { height: 105px; transform: rotate(3deg); }
+        .stick:nth-child(3) { height: 115px; transform: rotate(-2deg); }
+        .stick:nth-child(4) { height: 108px; transform: rotate(4deg); }
+        .stick:nth-child(5) { height: 112px; transform: rotate(-3deg); }
+        .stick:nth-child(6) { height: 106px; transform: rotate(2deg); }
+        .stick:nth-child(7) { height: 110px; transform: rotate(-4deg); }
+        
+        /* 签筒文字 */
+        .bucket-text {
+            position: absolute;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #FFD700;
+            font-size: 1.2em;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            z-index: 10;
+            white-space: nowrap;
+        }
+        
+        /* 签筒底座 */
+        .bucket-base {
+            width: 100%;
+            height: 40px;
+            background: linear-gradient(180deg, #654321 0%, #4A2511 100%);
+            border-radius: 0 0 50px 50px;
+            position: absolute;
+            bottom: 0;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+        }
+        
+        /* hover 效果 */
+        .btn-draw:hover {
+            transform: translateY(-5px);
+        }
+        .btn-draw:hover .bucket {
+            box-shadow: 0 15px 40px rgba(0,0,0,0.4), inset 0 -5px 15px rgba(0,0,0,0.3);
+        }
+        
+        /* 摇动动画 */
+        .btn-draw.shaking {
+            animation: shake-bucket 0.3s ease-in-out;
+        }
+        @keyframes shake-bucket {
+            0%, 100% { transform: translateX(0) rotate(0deg); }
+            25% { transform: translateX(-15px) rotate(-8deg); }
+            50% { transform: translateX(15px) rotate(8deg); }
+            75% { transform: translateX(-15px) rotate(-8deg); }
+        }
+        
+        /* 禁用状态 */
+        .btn-draw:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .btn-draw:disabled .bucket {
+            background: linear-gradient(180deg, #888 0%, #666 50%, #888 100%);
+        }
+        
+        /* 计数器 */
+        .shake-count {
+            position: absolute;
+            top: -35px;
+            right: 20px;
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #8B0000;
+            padding: 8px 18px;
+            border-radius: 25px;
+            font-size: 1em;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.5);
+            border: 3px solid #FFF;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
         .drawing-animation { text-align: center; display: none; margin: 30px 0; }
         .stick { font-size: 3em; animation: shake 0.5s infinite; display: inline-block; }
         @keyframes shake { 0%, 100% { transform: translateX(0) rotate(0deg); } 25% { transform: translateX(-10px) rotate(-5deg); } 75% { transform: translateX(10px) rotate(5deg); } }
@@ -94,7 +233,21 @@
                 <div class="checkbox-group"><label><input type="checkbox" id="anonymous"> 匿名抽签（不显示姓名）</label></div>
                 <input type="text" id="blessing" placeholder="写下您的新春祝福（可选）" maxlength="50">
             </div>
-            <button class="btn-draw" onclick="startDraw()">🎋 开始抽签</button>
+            <button class="btn-draw" onclick="startDraw()">
+                <div class="bucket">
+                    <div class="sticks">
+                        <div class="stick"></div>
+                        <div class="stick"></div>
+                        <div class="stick"></div>
+                        <div class="stick"></div>
+                        <div class="stick"></div>
+                        <div class="stick"></div>
+                        <div class="stick"></div>
+                    </div>
+                    <div class="bucket-text">开始抽签</div>
+                </div>
+                <div class="bucket-base"></div>
+            </button>
         </div>
 
         <div class="drawing-animation" id="drawingAnimation">
@@ -137,7 +290,7 @@
         const CONFIG = {
             owner: 'ggbkole',
             repo: 'ggbkole.github.io',
-            token: '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'  
+            token: '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'  // ← 在这里填写你的新Token，格式： token: 'ghp_xxxxxxxxxx'
         };
 
         // ====== 50种签文数据 ======
@@ -302,7 +455,15 @@
             requiredShakes = Math.floor(Math.random() * 11) + 10;  // 10-20次随机
             
             const btn = document.querySelector('.btn-draw');
-            btn.innerHTML = `🎋 摇一摇签筒 <span class="shake-count">0/${requiredShakes}</span>`;
+            const bucketText = btn.querySelector('.bucket-text');
+            bucketText.textContent = '摇一摇';
+            
+            // 添加计数器
+            const countSpan = document.createElement('span');
+            countSpan.className = 'shake-count';
+            countSpan.textContent = `0/${requiredShakes}`;
+            btn.appendChild(countSpan);
+            
             btn.onclick = shakeBucket;
         }
         
@@ -321,7 +482,9 @@
             // 判断是否达到摇签次数
             if (shakeCount >= requiredShakes) {
                 btn.disabled = true;
-                btn.innerHTML = '🎋 签文即将显示...';
+                const bucketText = btn.querySelector('.bucket-text');
+                bucketText.textContent = '签文即将...';
+                countSpan.remove();  // 移除计数器
                 
                 document.getElementById('inputSection').style.display = 'none';
                 document.getElementById('drawingAnimation').style.display = 'block';
@@ -363,7 +526,13 @@
             
             // 重置按钮
             const btn = document.querySelector('.btn-draw');
-            btn.innerHTML = '🎋 开始抽签';
+            const bucketText = btn.querySelector('.bucket-text');
+            bucketText.textContent = '开始抽签';
+            
+            // 移除可能存在的计数器
+            const oldCount = btn.querySelector('.shake-count');
+            if (oldCount) oldCount.remove();
+            
             btn.onclick = startDraw;
             btn.disabled = false;
             
