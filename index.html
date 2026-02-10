@@ -3,781 +3,416 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>鸽子等级测试 - 你到底有多鸽？</title>
+    <title>新春祈福抽签 - 2026龙年大吉</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Microsoft YaHei', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow-x: hidden;
-            position: relative;
-        }
-
-        /* 飞翔的鸽子背景 */
-        .flying-pigeon {
-            position: fixed;
-            font-size: 30px;
-            animation: fly 15s linear infinite;
-            z-index: 1;
-            opacity: 0.3;
-        }
-
-        @keyframes fly {
-            from {
-                left: -50px;
-                transform: translateY(0px);
-            }
-            25% {
-                transform: translateY(-30px);
-            }
-            50% {
-                transform: translateY(30px);
-            }
-            75% {
-                transform: translateY(-20px);
-            }
-            to {
-                left: 100%;
-                transform: translateY(0px);
-            }
-        }
-
-        .container {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            padding: 40px;
-            max-width: 600px;
-            width: 90%;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            position: relative;
-            z-index: 10;
-        }
-
-        .container:hover {
-            border: 3px dashed #ff6b6b;
-        }
-
-        h1 {
-            text-align: center;
-            color: #e74c3c;
-            margin-bottom: 10px;
-            font-size: 2.5em;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .subtitle {
-            text-align: center;
-            color: #666;
-            margin-bottom: 30px;
-            font-style: italic;
-        }
-
-        .start-screen, .question-screen, .result-screen {
-            display: none;
-        }
-
-        .start-screen.active, .question-screen.active, .result-screen.active {
-            display: block;
-        }
-
-        .start-btn {
-            display: block;
-            margin: 30px auto;
-            padding: 15px 40px;
-            font-size: 1.2em;
-            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
-            color: white;
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 4px 15px rgba(238, 90, 36, 0.4);
-        }
-
-        .start-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(238, 90, 36, 0.6);
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 10px;
-            background: #ecf0f1;
-            border-radius: 5px;
-            margin-bottom: 30px;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #f39c12, #e74c3c);
-            border-radius: 5px;
-            transition: width 0.5s ease;
-            width: 0%;
-        }
-
-        .question {
-            font-size: 1.3em;
-            color: #2c3e50;
-            margin-bottom: 30px;
-            line-height: 1.6;
-            padding: 20px;
-            background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
-            border-radius: 15px;
-            border-left: 5px solid #e74c3c;
-        }
-
-        .options {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .option {
-            padding: 15px 20px;
-            background: white;
-            border: 2px solid #ddd;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .option:hover {
-            background: #ffeaa7;
-            border-color: #e74c3c;
-            transform: translateX(10px);
-            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
-        }
-
-        .option::before {
-            content: '🕊️';
-            position: absolute;
-            right: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-
-        .option:hover::before {
-            opacity: 1;
-        }
-
-        .result-title {
-            text-align: center;
-            font-size: 2em;
-            margin-bottom: 20px;
-        }
-
-        .pigeon-level {
-            text-align: center;
-            font-size: 3em;
-            font-weight: bold;
-            margin: 20px 0;
-            animation: pulse 1s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-        }
-
-        .level-1 { color: #27ae60; }
-        .level-2 { color: #f39c12; }
-        .level-3 { color: #e67e22; }
-        .level-4 { color: #e74c3c; }
-        .level-5 { color: #8e44ad; }
-
-        .insult {
-            text-align: center;
-            font-size: 1.2em;
-            color: #2c3e50;
-            margin: 20px 0;
-            padding: 20px;
-            background: #ffeaa7;
-            border-radius: 15px;
-            line-height: 1.6;
-        }
-
-        .history-btn, .restart-btn {
-            display: inline-block;
-            margin: 10px;
-            padding: 12px 30px;
-            background: #3498db;
-            color: white;
-            border: none;
-            border-radius: 25px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .restart-btn {
-            background: #e74c3c;
-        }
-
-        .history-btn:hover, .restart-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-
-        .history-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .history-content {
-            background: white;
-            padding: 30px;
-            border-radius: 20px;
-            max-width: 500px;
-            width: 90%;
-            max-height: 70vh;
-            overflow-y: auto;
-        }
-
-        .history-item {
-            padding: 15px;
-            margin: 10px 0;
-            background: #ecf0f1;
-            border-radius: 10px;
-            border-left: 4px solid #3498db;
-        }
-
-        .close-modal {
-            float: right;
-            font-size: 1.5em;
-            cursor: pointer;
-            color: #e74c3c;
-        }
-
-        /* 掉落动画 */
-        .falling-item {
-            position: fixed;
-            font-size: 30px;
-            z-index: 100;
-            animation: fall 3s ease-in forwards;
-        }
-
-        @keyframes fall {
-            from {
-                transform: translateY(-100px) rotate(0deg);
-                opacity: 1;
-            }
-            to {
-                transform: translateY(100vh) rotate(360deg);
-                opacity: 0;
-            }
-        }
-
-        .stats {
-            text-align: center;
-            margin: 20px 0;
-            padding: 15px;
-            background: #ecf0f1;
-            border-radius: 10px;
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'KaiTi', 'STKaiti', '楷体', serif; background: linear-gradient(135deg, #8B0000 0%, #DC143C 50%, #FF6347 100%); min-height: 100vh; padding: 20px 0; overflow-x: hidden; }
+        .fireworks { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
+        .container { position: relative; z-index: 10; background: rgba(255, 255, 255, 0.95); border-radius: 20px; padding: 40px; max-width: 800px; width: 90%; margin: 0 auto 30px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); border: 3px solid #FFD700; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 { color: #DC143C; font-size: 2.5em; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1); }
+        .header .subtitle { color: #B8860B; font-size: 1.2em; margin-top: 10px; }
+        .lantern { display: inline-block; animation: swing 3s ease-in-out infinite; }
+        @keyframes swing { 0%, 100% { transform: rotate(-5deg); } 50% { transform: rotate(5deg); } }
+        .stats-panel { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 30px; }
+        .stat-card { background: linear-gradient(135deg, #FFE4B5 0%, #FFD700 100%); padding: 15px; border-radius: 10px; text-align: center; border: 2px solid #DAA520; }
+        .stat-card .number { font-size: 2em; color: #DC143C; font-weight: bold; }
+        .stat-card .label { color: #8B0000; margin-top: 5px; font-size: 0.9em; }
+        .input-section { text-align: center; margin-bottom: 30px; }
+        .input-section label { display: block; color: #8B0000; font-size: 1.3em; margin-bottom: 15px; font-weight: bold; }
+        .input-group { max-width: 400px; margin: 0 auto; }
+        .input-section input[type="text"] { width: 100%; padding: 15px; font-size: 1.1em; border: 2px solid #FFD700; border-radius: 10px; text-align: center; font-family: inherit; background: #FFF8DC; margin-bottom: 10px; }
+        .input-section input:focus { outline: none; border-color: #DC143C; box-shadow: 0 0 10px rgba(220, 20, 60, 0.3); }
+        .checkbox-group { margin: 10px 0; color: #666; font-size: 0.95em; }
+        .checkbox-group input[type="checkbox"] { width: auto; margin-right: 5px; }
+        .btn-draw { display: block; margin: 20px auto; padding: 15px 50px; font-size: 1.3em; font-weight: bold; color: white; background: linear-gradient(135deg, #DC143C 0%, #8B0000 100%); border: none; border-radius: 50px; cursor: pointer; box-shadow: 0 5px 15px rgba(220, 20, 60, 0.4); transition: all 0.3s; font-family: inherit; }
+        .btn-draw:hover { transform: translateY(-2px); box-shadow: 0 7px 20px rgba(220, 20, 60, 0.6); }
+        .btn-draw:active { transform: translateY(0); }
+        .btn-draw:disabled { background: #ccc; cursor: not-allowed; }
+        .drawing-animation { text-align: center; display: none; margin: 30px 0; }
+        .stick { font-size: 3em; animation: shake 0.5s infinite; display: inline-block; }
+        @keyframes shake { 0%, 100% { transform: translateX(0) rotate(0deg); } 25% { transform: translateX(-10px) rotate(-5deg); } 75% { transform: translateX(10px) rotate(5deg); } }
+        .result-section { display: none; animation: fadeIn 1s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .fortune-card { background: linear-gradient(135deg, #FFF8DC 0%, #FFE4B5 100%); border: 3px solid #DAA520; border-radius: 15px; padding: 25px; margin-top: 20px; }
+        .fortune-title { text-align: center; color: #8B0000; font-size: 2em; margin-bottom: 20px; font-weight: bold; }
+        .fortune-type { text-align: center; font-size: 1.5em; color: #DC143C; margin-bottom: 15px; padding: 10px; background: white; border-radius: 10px; border: 2px solid #FFD700; }
+        .fortune-poem { background: white; padding: 20px; border-radius: 10px; margin-bottom: 15px; border-left: 4px solid #DC143C; line-height: 2; font-size: 1.1em; color: #2F4F4F; white-space: pre-line; }
+        .fortune-explanation { background: white; padding: 20px; border-radius: 10px; margin-top: 15px; border-left: 4px solid #DC143C; }
+        .fortune-explanation h3 { color: #8B0000; margin-bottom: 10px; }
+        .fortune-explanation p { color: #555; line-height: 1.6; margin-bottom: 10px; }
+        .fortune-aspects { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px; }
+        .aspect-card { background: #FFF8DC; padding: 15px; border-radius: 10px; border: 2px solid #FFD700; }
+        .aspect-card h4 { color: #DC143C; margin-bottom: 8px; font-size: 1.1em; }
+        .aspect-card p { color: #666; font-size: 0.95em; line-height: 1.5; }
+        .btn-again { display: block; margin: 20px auto 0; padding: 12px 40px; font-size: 1.1em; color: #8B0000; background: white; border: 2px solid #DC143C; border-radius: 50px; cursor: pointer; font-family: inherit; transition: all 0.3s; }
+        .btn-again:hover { background: #DC143C; color: white; }
+        .visitor-wall { margin-top: 40px; padding-top: 30px; border-top: 3px dashed #FFD700; }
+        .visitor-wall h2 { text-align: center; color: #DC143C; margin-bottom: 20px; font-size: 1.8em; }
+        .visitor-list { max-height: 400px; overflow-y: auto; padding: 10px; }
+        .visitor-item { background: linear-gradient(135deg, #FFF8DC 0%, #FFE4B5 100%); padding: 15px; margin-bottom: 10px; border-radius: 10px; border-left: 4px solid #DC143C; animation: slideIn 0.5s; }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
+        .visitor-item .visitor-name { color: #DC143C; font-weight: bold; font-size: 1.1em; }
+        .visitor-item .visitor-fortune { color: #B8860B; margin: 5px 0; }
+        .visitor-item .visitor-time { color: #999; font-size: 0.9em; }
+        .visitor-item .visitor-blessing { color: #666; margin-top: 8px; font-style: italic; background: white; padding: 8px; border-radius: 5px; }
+        .decoration { text-align: center; font-size: 2em; margin: 20px 0; }
+        .loading { text-align: center; color: #DC143C; padding: 20px; }
+        .error-msg { background: #FFE4E1; color: #DC143C; padding: 15px; border-radius: 10px; margin: 15px 0; border-left: 4px solid #DC143C; }
+        @media (max-width: 768px) {
+            .container { padding: 25px; }
+            .header h1 { font-size: 1.8em; }
+            .header .subtitle { font-size: 1em; }
+            .fortune-aspects { grid-template-columns: 1fr; }
+            .stats-panel { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
-    <!-- 飞翔的鸽子背景 -->
-    <div class="flying-pigeon" style="top: 10%;">🕊️</div>
-    <div class="flying-pigeon" style="top: 30%; animation-delay: 3s;">🕊️</div>
-    <div class="flying-pigeon" style="top: 50%; animation-delay: 6s;">🕊️</div>
-    <div class="flying-pigeon" style="top: 70%; animation-delay: 9s;">🕊️</div>
-    <div class="flying-pigeon" style="top: 85%; animation-delay: 12s;">🕊️</div>
-
+    <canvas class="fireworks" id="fireworks"></canvas>
+    
     <div class="container">
-        <h1>🕊️ 鸽子等级测试 🕊️</h1>
-        <p class="subtitle">看看你到底有多能鸽！</p>
-
-        <!-- 开始界面 -->
-        <div class="start-screen active">
-            <div style="text-align: center; margin: 30px 0;">
-                <p style="font-size: 1.1em; color: #666; line-height: 1.8;">
-                    兄弟局、女朋友约会、家人聚会...<br>
-                    你总是有各种理由放鸽子吗？<br>
-                    来测试一下你的鸽子等级吧！<br>
-                    <strong>警告：结果可能会让你无地自容！</strong> 🤣
-                </p>
-            </div>
-            <button class="start-btn" onclick="startTest()">开始测试</button>
-            
-            <div class="stats" id="startStats">
-                <p>历史测试次数：<span id="totalTests">0</span></p>
-                <p>平均鸽子等级：<span id="avgLevel">-</span></p>
-            </div>
+        <div class="header">
+            <div class="decoration"><span class="lantern">🏮</span><span>🧧</span><span class="lantern">🏮</span></div>
+            <h1>新春祈福抽签</h1>
+            <p class="subtitle">🐉 2026龙年大吉 · 福运亨通 🐉</p>
         </div>
 
-        <!-- 问题界面 -->
-        <div class="question-screen">
-            <div class="progress-bar">
-                <div class="progress-fill" id="progressBar"></div>
-            </div>
-            <div class="question" id="questionText"></div>
-            <div class="options" id="optionsContainer"></div>
+        <div class="stats-panel">
+            <div class="stat-card"><div class="number" id="totalCount">-</div><div class="label">今日抽签</div></div>
+            <div class="stat-card"><div class="number" id="luckyCount">-</div><div class="label">上吉签</div></div>
+            <div class="stat-card"><div class="number" id="visitorCount">-</div><div class="label">访客总数</div></div>
         </div>
 
-        <!-- 结果界面 -->
-        <div class="result-screen">
-            <div class="result-title">测试完成！</div>
-            <div class="pigeon-level" id="pigeonLevel"></div>
-            <div class="insult" id="insultText"></div>
-            <div style="text-align: center;">
-                <button class="history-btn" onclick="showHistory()">查看历史</button>
-                <button class="restart-btn" onclick="restartTest()">再测一次</button>
+        <div class="input-section" id="inputSection">
+            <label for="userName">🎋 请输入您的姓名</label>
+            <div class="input-group">
+                <input type="text" id="userName" placeholder="请输入姓名" maxlength="10">
+                <div class="checkbox-group"><label><input type="checkbox" id="anonymous"> 匿名抽签（不显示姓名）</label></div>
+                <input type="text" id="blessing" placeholder="写下您的新春祝福（可选）" maxlength="50">
             </div>
+            <button class="btn-draw" onclick="startDraw()">🎋 开始抽签</button>
         </div>
-    </div>
 
-    <!-- 历史记录模态框 -->
-    <div class="history-modal" id="historyModal">
-        <div class="history-content">
-            <span class="close-modal" onclick="closeHistory()">&times;</span>
-            <h2 style="text-align: center; margin-bottom: 20px;">🕊️ 鸽子历史记录 🕊️</h2>
-            <div id="historyList"></div>
+        <div class="drawing-animation" id="drawingAnimation">
+            <p style="color: #DC143C; font-size: 1.3em; margin-bottom: 20px;">诚心祈福中...</p>
+            <div class="stick">🎋🎋🎋</div>
         </div>
+
+        <div class="result-section" id="resultSection">
+            <div class="fortune-card">
+                <div class="fortune-title" id="fortuneTitle"></div>
+                <div class="fortune-type" id="fortuneType"></div>
+                <div class="fortune-poem" id="fortunePoem"></div>
+                <div class="fortune-explanation"><h3>📜 签文解析</h3><p id="fortuneExplanation"></p></div>
+                <div class="fortune-aspects" id="fortuneAspects"></div>
+                <div class="fortune-explanation" style="margin-top: 15px;"><h3>💡 行动建议</h3><p id="fortuneAdvice"></p></div>
+            </div>
+            <button class="btn-again" onclick="resetDraw()">🔄 再抽一签</button>
+        </div>
+
+        <div class="visitor-wall">
+            <h2>🎊 访客祈福墙 🎊</h2>
+            <div class="loading" id="wallLoading">加载访客记录中...</div>
+            <div class="visitor-list" id="visitorList"></div>
+        </div>
+
+        <div class="decoration">✨ 🎆 ✨</div>
     </div>
 
     <script>
-        // 题目数据
-        const questions = [
-            {
-                question: "兄弟约好周末开黑打游戏，你...",
-                options: [
-                    { text: "准时上线，还带零食", score: 0 },
-                    { text: "迟到10分钟，说刚吃完饭", score: 1 },
-                    { text: "推迟1小时，说临时有事", score: 2 },
-                    { text: "临时说家里来客人了", score: 3 },
-                    { text: "直接消失，第二天才回消息", score: 4 }
-                ]
-            },
-            {
-                question: "女朋友约你看电影，你...",
-                options: [
-                    { text: "提前到影院买好爆米花", score: 0 },
-                    { text: "迟到15分钟，路上堵车", score: 1 },
-                    { text: "说工作忙，改天吧", score: 2 },
-                    { text: "临出发说朋友急事找", score: 3 },
-                    { text: "直接关机，说手机没电", score: 4 }
-                ]
-            },
-            {
-                question: "家庭聚餐，爸妈让你回家吃饭，你...",
-                options: [
-                    { text: "提前回家帮妈妈做饭", score: 0 },
-                    { text: "晚到半小时，说加班", score: 1 },
-                    { text: "说公司聚餐，回不去", score: 2 },
-                    { text: "说身体不舒服要休息", score: 3 },
-                    { text: "不接电话，直接玩失踪", score: 4 }
-                ]
-            },
-            {
-                question: "朋友生日聚会，你...",
-                options: [
-                    { text: "带礼物准时到场", score: 0 },
-                    { text: "迟到20分钟，路上堵车", score: 1 },
-                    { text: "说临时有工作要处理", score: 2 },
-                    { text: "说家里有急事去不了", score: 3 },
-                    { text: "朋友圈看到你在别处玩", score: 4 }
-                ]
-            },
-            {
-                question: "约好去健身房，你...",
-                options: [
-                    { text: "提前到健身房热身", score: 0 },
-                    { text: "晚到15分钟，路上堵车", score: 1 },
-                    { text: "说今天太累了，明天再去", score: 2 },
-                    { text: "说肌肉酸痛需要休息", score: 3 },
-                    { text: "直接在家躺平，不回消息", score: 4 }
-                ]
-            },
-            {
-                question: "同事约你周末爬山，你...",
-                options: [
-                    { text: "准备装备，准时集合", score: 0 },
-                    { text: "迟到半小时，说起晚了", score: 1 },
-                    { text: "说天气不好，下次吧", score: 2 },
-                    { text: "说膝盖不舒服不能爬", score: 3 },
-                    { text: "不接电话，假装没看到", score: 4 }
-                ]
-            },
-            {
-                question: "答应帮朋友搬家，你...",
-                options: [
-                    { text: "提前到帮着打包", score: 0 },
-                    { text: "晚到20分钟，说堵车", score: 1 },
-                    { text: "说临时加班去不了", score: 2 },
-                    { text: "说腰扭伤了不能搬重物", score: 3 },
-                    { text: "关机一天，说手机坏了", score: 4 }
-                ]
-            },
-            {
-                question: "网友约见面吃饭，你...",
-                options: [
-                    { text: "提前到餐厅等对方", score: 0 },
-                    { text: "迟到10分钟，找停车位", score: 1 },
-                    { text: "说临时有事改时间", score: 2 },
-                    { text: "说身体不适不想出门", score: 3 },
-                    { text: "直接拉黑，人间蒸发", score: 4 }
-                ]
-            },
-            {
-                question: "约好去图书馆学习，你...",
-                options: [
-                    { text: "提前占好座位", score: 0 },
-                    { text: "晚到15分钟，路上堵车", score: 1 },
-                    { text: "说今天状态不好不想学", score: 2 },
-                    { text: "说头疼需要在家休息", score: 3 },
-                    { text: "在家打游戏，假装学习", score: 4 }
-                ]
-            },
-            {
-                question: "朋友请你吃饭，你...",
-                options: [
-                    { text: "准时到还带小礼物", score: 0 },
-                    { text: "迟到20分钟，说堵车", score: 1 },
-                    { text: "说临时有会议要开", score: 2 },
-                    { text: "说肠胃不适不能出门", score: 3 },
-                    { text: "不回消息，朋友圈晒美食", score: 4 }
-                ]
-            },
-            {
-                question: "约好一起看球赛，你...",
-                options: [
-                    { text: "带啤酒零食准时到", score: 0 },
-                    { text: "迟到15分钟，说堵车", score: 1 },
-                    { text: "说临时加班看不了", score: 2 },
-                    { text: "说电视坏了在家看不了", score: 3 },
-                    { text: "直接睡觉，不接电话", score: 4 }
-                ]
-            },
-            {
-                question: "答应陪朋友逛街，你...",
-                options: [
-                    { text: "提前到商场等朋友", score: 0 },
-                    { text: "迟到20分钟，说堵车", score: 1 },
-                    { text: "说突然来了工作", score: 2 },
-                    { text: "说脚疼走不了路", score: 3 },
-                    { text: "在家躺平，不回消息", score: 4 }
-                ]
-            },
-            {
-                question: "约好去KTV唱歌，你...",
-                options: [
-                    { text: "提前到订好包厢", score: 0 },
-                    { text: "迟到15分钟，说堵车", score: 1 },
-                    { text: "说嗓子不舒服不想唱", score: 2 },
-                    { text: "说感冒了不能出门", score: 3 },
-                    { text: "在家看剧，假装生病", score: 4 }
-                ]
-            },
-            {
-                question: "朋友约你钓鱼，你...",
-                options: [
-                    { text: "准备渔具准时到", score: 0 },
-                    { text: "迟到30分钟，说堵车", score: 1 },
-                    { text: "说天气不好不想去", score: 2 },
-                    { text: "说对鱼过敏不能去", score: 3 },
-                    { text: "在家睡觉，不接电话", score: 4 }
-                ]
-            },
-            {
-                question: "约好去旅游，你...",
-                options: [
-                    { text: "提前准备行李等出发", score: 0 },
-                    { text: "迟到1小时，说收拾行李", score: 1 },
-                    { text: "说临时工作走不开", score: 2 },
-                    { text: "说突然有事去不了", score: 3 },
-                    { text: "直接消失，机票浪费", score: 4 }
-                ]
-            },
-            {
-                question: "答应帮朋友修电脑，你...",
-                options: [
-                    { text: "带工具准时上门", score: 0 },
-                    { text: "迟到30分钟，说堵车", score: 1 },
-                    { text: "说今天太累明天再去", score: 2 },
-                    { text: "说工具坏了修不了", score: 3 },
-                    { text: "不接电话，假装没空", score: 4 }
-                ]
-            },
-            {
-                question: "约好一起做项目，你...",
-                options: [
-                    { text: "提前到准备材料", score: 0 },
-                    { text: "迟到20分钟，说堵车", score: 1 },
-                    { text: "说有其他工作要处理", score: 2 },
-                    { text: "说思路卡住需要休息", score: 3 },
-                    { text: "在家打游戏，假装思考", score: 4 }
-                ]
-            },
-            {
-                question: "朋友约你喝酒，你...",
-                options: [
-                    { text: "准时到还带下酒菜", score: 0 },
-                    { text: "迟到15分钟，说堵车", score: 1 },
-                    { text: "说明天要上班不能喝", score: 2 },
-                    { text: "说酒精过敏不能喝", score: 3 },
-                    { text: "在家喝茶，假装养生", score: 4 }
-                ]
-            },
-            {
-                question: "约好去听音乐会，你...",
-                options: [
-                    { text: "提前到占好位置", score: 0 },
-                    { text: "迟到20分钟，说堵车", score: 1 },
-                    { text: "说突然有事去不了", score: 2 },
-                    { text: "说耳朵不舒服不能听", score: 3 },
-                    { text: "在家听歌，假装去了", score: 4 }
-                ]
-            },
-            {
-                question: "答应陪朋友看病，你...",
-                options: [
-                    { text: "提前到医院挂号", score: 0 },
-                    { text: "迟到30分钟，说堵车", score: 1 },
-                    { text: "说工作忙去不了", score: 2 },
-                    { text: "说自己也生病了", score: 3 },
-                    { text: "在家休息，不接电话", score: 4 }
-                ]
-            }
-        ];
-
-        // 羞辱评价
-        const insults = {
-            1: {
-                title: "🐦 菜鸟级鸽子",
-                text: "恭喜你！你基本还算个人！虽然偶尔也会放鸽子，但至少还有点良心。朋友们还能勉强忍受你，继续加油！👍",
-                emoji: "🌟"
-            },
-            2: {
-                title: "🕊️ 普通级鸽子",
-                text: "嗯...你已经掌握了鸽子的基本技能！迟到、找借口这些操作已经很熟练了。朋友们开始怀疑你的人品，但还抱有一丝希望。😅",
-                emoji: "🤔"
-            },
-            3: {
-                title: "🦅 熟练级鸽子",
-                text: "哇！你已经是个合格的鸽子了！各种借口信手拈来，放鸽子如呼吸般自然。朋友们已经不指望你了，约你只是走个形式。🤷‍♂️",
-                emoji: "🎭"
-            },
-            4: {
-                title: "🦆 大师级鸽子",
-                text: "厉害了！你就是鸽子界的战斗机！🥚 你的存在让'诚信'这个词变得苍白无力。朋友们约你之前都会先算一卦，看看今天是不是不宜见你。🥚🍅",
-                emoji: "💩"
-            },
-            5: {
-                title: "🦤 传说级鸽王",
-                text: "我的天！你已经超越了鸽子的境界！你就是鸽神！🥚🍅💩 你的朋友们可能已经忘了你长什么样了。建议你改名叫'永远在路上'，因为永远在路上，但永远到不了！",
-                emoji: "☠️"
-            }
+        // ====== 配置区域 ======
+        const CONFIG = {
+            owner: 'ggbkole',
+            repo: 'ggbkole.github.io',
+            token: ''  // 请在这里填写您的 GitHub Personal Access Token
         };
 
-        let currentQuestion = 0;
-        let totalScore = 0;
-        let testHistory = [];
-        let shuffledQuestions = [];
+        // ====== 50种签文数据 ======
+        const fortunes = [
+            {id:1,level:"上上签",type:"鸿运当头",poem:"春风得意马蹄疾，一日看尽长安花。\n紫气东来千里远，金龙献瑞福满门。",explanation:"此签为上上之选，预示龙年将迎来极佳运势。事业如日中天，贵人相助频频，所求皆能如愿。正是大展宏图的绝佳时机。",career:"事业运极旺，有晋升或重大突破机会，大胆行动必有收获。",wealth:"财运亨通，正财偏财俱佳，投资有道可获丰厚回报。",love:"桃花运旺盛，单身者有望遇到命中注定之人，有伴者感情升温。",health:"身心康健，精力充沛，宜适当运动保持状态。",advice:"把握机遇，积极进取，广结善缘。大胆尝试新事物，成功率极高。",probability:3},
+            {id:2,level:"上上签",type:"龙凤呈祥",poem:"龙腾四海风云起，凤舞九天瑞气来。\n天时地利人和聚，功成名就正当时。",explanation:"龙年遇龙签，极为难得。天时地利人和齐备，万事俱佳。此时行事如有神助，事半功倍。",career:"领导赏识，同事支持，团队协作无间，重大项目易成。",wealth:"横财临门，意外之喜不断，理财投资皆获利。",love:"美满姻缘将至，有喜事临门，宜把握良机。",health:"气色红润，百病不侵，龙马精神。",advice:"此时宜成婚、创业、投资、远行，诸事皆宜。保持积极心态，福气自来。",probability:2},
+            {id:3,level:"上上签",type:"福禄双全",poem:"福星高照门庭旺，禄位高升事业昌。\n家和业兴财源广，子孝孙贤福寿长。",explanation:"福禄寿喜四全，家庭事业两得意。不仅自身顺遂，家人也沾福气，是全方位的吉祥之签。",career:"职位稳步提升，收入大幅增长，名利双收。",wealth:"财源滚滚，多路进财，财库充盈。",love:"家庭和睦，夫妻恩爱，子女孝顺，天伦之乐。",health:"身体健康，延年益寿，精神愉悦。",advice:"回馈家人，感恩知足。事业上可大展拳脚，家庭方面多陪伴。",probability:3},
+            {id:4,level:"上上签",type:"金榜题名",poem:"十年寒窗今朝试，一举成名天下知。\n学业有成前程远，锦绣前程在眼前。",explanation:"学业事业将有重大突破，努力终见成果。适合考试、面试、竞争等场合，成功率极高。",career:"考核优异，晋升有望，获得重要认可。",wealth:"因才华获得高薪或奖金，知识变现顺利。",love:"才子佳人相遇，志同道合者将出现。",health:"脑力充沛，思维敏捷，状态极佳。",advice:"全力以赴准备重要考试或项目，展示才华的时机到了。持续学习投资自己。",probability:3},
+            {id:5,level:"上上签",type:"万事如意",poem:"心想事成无阻碍，诸事顺遂尽如意。\n贵人扶持好运来，笑口常开福气至。",explanation:"心想事成的极佳运势，所思所想皆能实现。贵人运极旺，做事顺风顺水，障碍自解。",career:"任何计划都能顺利推进，团队配合默契。",wealth:"财运顺畅，所投皆有回报，无破财之忧。",love:"感情和顺，心意相通，幸福美满。",health:"身心愉悦，笑口常开，健康无虞。",advice:"大胆追求梦想，此时行动成功率极高。保持感恩之心，福气会持续。",probability:2},
+            {id:6,level:"上吉签",type:"喜事临门",poem:"喜鹊登枝报佳音，好事成双福满门。\n贵人相助时运转，春风得意乐开怀。",explanation:"近期将有多个喜事发生，可能是升职加薪、结婚生子或其他值得庆贺之事。运势强劲向好。",career:"工作上有好消息传来，可能获得提升或重要项目。",wealth:"财运上佳，有意外收入或奖金到账。",love:"感情进展顺利，有望步入婚姻殿堂或添丁。",health:"精神愉快，身体健康，喜气洋洋。",advice:"积极把握机会，多与人交流分享喜悦。适合办喜事、搬新家。",probability:8},
+            {id:7,level:"上吉签",type:"事业腾飞",poem:"鲲鹏展翅九万里，扶摇直上青云志。\n事业如虹势如破，功名富贵在眼前。",explanation:"事业运势强劲，将有重大发展机遇。如创业、跳槽或重要项目，此时推进最为有利。",career:"晋升机会来临，或创业时机成熟，大展宏图。",wealth:"事业带动财运，收入显著增长。",love:"事业顺遂带来自信，魅力大增，异性缘佳。",health:"精力旺盛，但需注意劳逸结合。",advice:"全力冲刺事业目标，把握关键机遇。建立人脉网络，借力发展。",probability:8},
+            {id:8,level:"上吉签",type:"财源广进",poem:"财神眷顾生意兴，四方来财库盈盈。\n经营有道利润丰，金银满屋福禄增。",explanation:"财运极佳，适合投资、创业、做生意。多路财源涌入，财富快速积累的好时机。",career:"业务拓展顺利，客户资源丰富。",wealth:"投资理财收益丰厚，偏财运旺，可适当投资。",love:"物质基础稳固，感情更加稳定。",health:"衣食无忧，心情愉悦，健康平安。",advice:"把握商机，大胆投资（需理性），拓展业务渠道。量入为出，做好规划。",probability:7},
+            {id:9,level:"上吉签",type:"贵人相助",poem:"贵人提携前路明，逢凶化吉有人帮。\n困难重重终可解，扶持之力不可量。",explanation:"贵人运极佳，关键时刻总有人相助。遇到困难不用担心，自会有人解围。人际关系是关键。",career:"上级领导或前辈会给予重要帮助和指导。",wealth:"通过人脉获得赚钱机会或投资信息。",love:"朋友介绍或长辈牵线，有望成就良缘。",health:"病痛能遇良医，康复顺利。",advice:"多与人交往，建立良好人脉。感恩回馈帮助过你的人。主动寻求建议。",probability:8},
+            {id:10,level:"上吉签",type:"学业有成",poem:"才高八斗学识深，名列前茅众人钦。\n考试顺利成绩优，前程似锦展才华。",explanation:"学习考试运极佳，努力会有明显成效。适合各类考试、学习新技能、参加培训。",career:"考核考试成绩优异，职业资格证书易获得。",wealth:"学历或技能提升带来更高收入。",love:"知识魅力吸引异性，文化交流增进感情。",health:"脑力充沛，记忆力强，精神状态好。",advice:"全力投入学习，报考培训班。多读书充电，知识就是财富。",probability:8},
+            {id:11,level:"上吉签",type:"家和万事兴",poem:"家庭和睦福气多，老少平安笑呵呵。\n亲情浓厚温馨在，幸福美满乐陶陶。",explanation:"家庭运势极佳，家人和睦健康。家和万事兴，家庭的幸福是其他成功的基础。",career:"家人支持使工作无后顾之忧，专心发展。",wealth:"家庭财务稳定，共同致富。",love:"夫妻恩爱，亲子关系融洽，天伦之乐。",health:"全家健康平安，其乐融融。",advice:"多陪伴家人，珍惜亲情。家庭聚会增进感情。孝敬父母。",probability:8},
+            {id:12,level:"上吉签",type:"桃花朵朵",poem:"桃花盛开缘分至，红鸾星动喜事来。\n有情人终成眷属，鸳鸯戏水两相爱。",explanation:"感情运势极佳，单身者即将脱单，有伴者感情升温。爱情甜蜜幸福的好时光。",career:"人际关系和谐，合作顺利。",wealth:"感情稳定带来心情愉悦，工作效率提升。",love:"真命天子/女即将出现，或感情修成正果。",health:"心情愉悦，容光焕发，魅力四射。",advice:"积极参加社交活动，打扮自己。有伴者可考虑结婚。真诚待人。",probability:7},
+            {id:13,level:"上吉签",type:"心想事成",poem:"有志者事竟成功，所求如愿乐融融。\n计划推进无阻碍，目标实现在眼前。",explanation:"愿望实现的好运气，制定的计划能顺利完成。心诚则灵，努力就有回报。",career:"项目顺利推进，目标如期达成。",wealth:"理财计划收益良好，储蓄目标实现。",love:"感情需求得到满足，关系向期望方向发展。",health:"健康目标可以达成，减肥健身见效。",advice:"制定明确目标，按计划执行。保持积极心态，坚持不懈。",probability:8},
+            {id:14,level:"中上签",type:"稳中求进",poem:"步步为营稳当行，谨慎前进无大惊。\n小成可期大器晚，厚积薄发终成功。",explanation:"运势稳健，虽无大喜但持续向好。适合稳扎稳打，不宜冒险激进。耐心等待机会。",career:"工作稳定，小有进步，需要持续努力。",wealth:"收入稳定增长，适合储蓄而非投机。",love:"感情平稳发展，细水长流，需要经营。",health:"健康平稳，坚持养生效果好。",advice:"保持现状，稳步推进计划。积累经验和资源，等待更好时机。",probability:10},
+            {id:15,level:"中上签",type:"渐入佳境",poem:"开始虽难莫灰心，坚持努力见光明。\n困境过后见彩虹，渐入佳境福自来。",explanation:"运势呈上升趋势，开始可能困难，但坚持下去会越来越好。前景光明。",career:"新工作或项目初期有挑战，熟悉后会顺利。",wealth:"财运渐好，投资需要时间见效。",love:"感情需要磨合，度过磨合期会很甜蜜。",health:"身体恢复中，养生见效，越来越好。",advice:"不要轻易放弃，坚持就是胜利。给自己和别人时间适应。",probability:10},
+            {id:16,level:"中上签",type:"贵人指路",poem:"迷途之时有人指，拨云见日豁然开。\n听取良言莫固执，顺势而为成大事。",explanation:"遇到困惑时会有高人指点。重要的是虚心听取建议，不要一意孤行。",career:"前辈或导师的建议很重要，虚心学习。",wealth:"投资理财可咨询专业人士，避免盲目。",love:"长辈或朋友的意见值得参考，不要冲动。",health:"身体不适应及时就医，听从医嘱。",advice:"遇事多请教有经验的人。保持开放心态接受建议。三思而后行。",probability:10},
+            {id:17,level:"中上签",type:"柳暗花明",poem:"山重水复疑无路，柳暗花明又一村。\n莫被眼前困难挡，转角即是新天地。",explanation:"看似困难重重，实则转机就在眼前。换个角度思考，问题会迎刃而解。",career:"工作遇瓶颈，尝试新方法会有突破。",wealth:"财路暂时不明朗，寻找新渠道会有收获。",love:"感情遇冷淡期，创造新鲜感能重燃激情。",health:"换个治疗方式或生活习惯，健康会改善。",advice:"不要钻牛角尖，多角度看问题。尝试新方法，改变思维模式。",probability:10},
+            {id:18,level:"中上签",type:"小有所获",poem:"勤劳耕耘有收成，虽非大丰亦可喜。\n点滴积累成江河，知足常乐心欢喜。",explanation:"付出有回报，虽不是大富大贵，但稳定收获也值得欣慰。积少成多，知足常乐。",career:"工作成果得到认可，小有奖励。",wealth:"收入有增长，虽不多但很稳定。",love:"感情有小进展，小惊喜不断。",health:"身体状态好转，小病痊愈。",advice:"珍惜每一份收获，不要好高骛远。持续努力，量变引起质变。",probability:10},
+            {id:19,level:"中上签",type:"厚积薄发",poem:"默默耕耘莫浮躁，积累实力待时机。\n韬光养晦非无能，时机一到展才华。",explanation:"现在是积累期而非爆发期。沉下心来提升自己，时机成熟自然成功。",career:"学习充电阶段，暂时低调，未来可期。",wealth:"财富积累阶段，投资长期项目为佳。",love:"感情需要时间培养，不急于一时。",health:"调养身体，打好基础，预防疾病。",advice:"投资自己，学习新技能。制定长期计划，不急功近利。修炼内功。",probability:10},
+            {id:20,level:"中上签",type:"否极泰来",poem:"苦尽甘来福运转，否极泰来好运连。\n经历风雨见彩虹，困境已过迎光明。",explanation:"过去的困难即将过去，新的好运正在到来。坚持就是胜利，曙光就在前方。",career:"困难时期已过，工作将顺利起来。",wealth:"财务压力减轻，经济状况好转。",love:"感情危机化解，关系重归于好。",health:"病痛减轻或痊愈，身体恢复健康。",advice:"保持信心，坚持到底。总结经验教训，避免重蹈覆辙。",probability:10},
+            {id:21,level:"中上签",type:"和气生财",poem:"待人和善福气来，宽容大度化干戈。\n与人为善天地宽，和气生财万事兴。",explanation:"人际和谐是成功的关键。以和为贵，宽容待人，会带来意想不到的好运。",career:"团队合作顺利，人际关系和谐。",wealth:"合作生意兴隆，人脉带来财运。",love:"感情和睦，家庭幸福，减少争吵。",health:"心平气和有益健康，情绪稳定。",advice:"化解矛盾，以和为贵。真诚待人，建立良好人际关系。",probability:10},
+            {id:22,level:"中上签",type:"智慧指引",poem:"遇事多思三分利，谋定后动成功高。\n智慧人生少弯路，深思熟虑乃上策。",explanation:"需要运用智慧和策略。深思熟虑后再行动，不要冲动，成功率会更高。",career:"复杂问题需要巧妙解决，多思考。",wealth:"理财投资需要分析研究，理性决策。",love:"感情问题需要智慧处理，沟通技巧重要。",health:"了解养生知识，科学保健。",advice:"多读书思考，提升智慧。遇事冷静分析，不冲动。向聪明人学习。",probability:10},
+            {id:23,level:"中上签",type:"修身养性",poem:"静心修行养身心，内外兼修德才全。\n品格高尚福自来，修养提升运势好。",explanation:"注重内在修养和品德提升。外在的成功需要内在的充实，修身养性会带来好运。",career:"提升职业素养，注重职业道德。",wealth:"君子爱财取之有道，正道赚钱。",love:"内在美更吸引人，修养提升魅力。",health:"心性平和有益健康，修身养性延年益寿。",advice:"培养良好品格，提升个人修养。多读书反思，追求内在成长。",probability:10},
+            {id:24,level:"中吉签",type:"平稳向前",poem:"平平淡淡是真情，不急不缓稳当行。\n生活虽无大波澜，踏实前进终有成。",explanation:"运势平稳，生活波澜不惊。虽无大喜大悲，但稳定也是一种幸福。踏实生活。",career:"工作平稳，按部就班，不会有大变动。",wealth:"收入稳定，开支正常，财务平衡。",love:"感情平淡，日常相处，需要创造新鲜感。",health:"健康平稳，注意日常保养。",advice:"珍惜平淡生活，稳定也是福气。偶尔制造小惊喜增添生活乐趣。",probability:10},
+            {id:25,level:"中吉签",type:"耐心等待",poem:"时机未到莫着急，耐心等待终有时。\n守得云开见月明，静待花开结果时。",explanation:"目前不是行动的最佳时机，需要耐心等待。时机成熟时自然水到渠成。",career:"暂不宜跳槽或大改变，等待更好机会。",wealth:"投资需等待时机，不要急于求成。",love:"缘分未到，耐心等待合适的人。",health:"慢性病需要时间调理，不要心急。",advice:"培养耐心，学会等待。利用这段时间提升自己。观察时机，不盲目行动。",probability:10},
+            {id:26,level:"中吉签",type:"细水长流",poem:"感情深厚细水流，日久天长情意稠。\n平凡生活见真情，细心经营感情牢。",explanation:"强调长久和稳定。无论事业感情，都需要细心经营和长期投入，急不得。",career:"职业发展需要长期规划，一步步来。",wealth:"理财讲究长期投资，不要想着一夜暴富。",love:"感情需要用心维护，日常陪伴很重要。",health:"健康管理是长期工程，坚持养生。",advice:"凡事看长远，不要只看眼前。感情事业都需要持续投入。细心经营生活。",probability:10},
+            {id:27,level:"中吉签",type:"小心谨慎",poem:"行事需要多留心，谨言慎行避风险。\n小心驶得万年船，步步为营保平安。",explanation:"需要谨慎小心，避免大意失荆州。细节决定成败，多注意细节问题。",career:"工作中注意细节，避免粗心犯错。",wealth:"理财投资要谨慎，不要冒险。",love:"感情中注意言行，避免误会。",health:"注意安全，预防事故和疾病。",advice:"做事仔细认真，检查再三。大事小事都不可大意。安全第一。",probability:10},
+            {id:28,level:"中吉签",type:"知足常乐",poem:"知足之人常快乐，比上不足比下余。\n感恩拥有惜当下，平凡幸福最可贵。",explanation:"提醒要知足感恩。不要过度攀比，珍惜现在拥有的，平凡生活也是幸福。",career:"工作虽普通但稳定，知足为佳。",wealth:"收入够用即可，不要贪心。",love:"伴侣虽平凡但真心，珍惜眼前人。",health:"身体健康就是福，不要过度劳累。",advice:"学会感恩，珍惜拥有。降低欲望，减少焦虑。平凡生活也要用心过。",probability:10},
+            {id:29,level:"中吉签",type:"循序渐进",poem:"万事莫要求速成，一步一个脚印行。\n欲速则不达道理，循序渐进终成功。",explanation:"不要急于求成，成功需要过程。脚踏实地，一步一个脚印，才能走得稳。",career:"职业发展不能跳级，需要逐步晋升。",wealth:"财富积累需要时间，不要想一夜暴富。",love:"感情发展需要过程，不能操之过急。",health:"身体调理需要时间，不能速效。",advice:"制定合理计划，分步实施。不要急功近利，质量比速度重要。",probability:10},
+            {id:30,level:"中吉签",type:"把握当下",poem:"光阴似箭不复返，珍惜当下好时光。\n莫让岁月空流逝，把握今天创辉煌。",explanation:"提醒珍惜时间，把握现在。不要总想着过去或未来，活在当下最重要。",career:"把握当前工作机会，认真对待。",wealth:"理性消费，享受生活，平衡储蓄。",love:"珍惜陪伴时光，用心经营关系。",health:"及时养生保健,不要等老了才后悔。",advice:"活在当下，享受生活。不要拖延，现在就行动。时间最宝贵。",probability:10},
+            {id:31,level:"中吉签",type:"真诚待人",poem:"真心实意交朋友，诚信为本立人生。\n以诚待人人敬重，真诚换来真友情。",explanation:"强调真诚和诚信的重要性。真心对待他人，会收获真心朋友和好运。",career:"诚信经营，真诚待客，生意长久。",wealth:"诚实赚钱，心安理得，福报自来。",love:"真心相待，坦诚沟通，感情稳固。",health:"心地坦荡，身心健康。",advice:"真诚待人，不要虚伪。诚信做事，建立良好口碑。坦率沟通。",probability:10},
+            {id:32,level:"中吉签",type:"自我提升",poem:"投资自己最划算，学习成长不停歇。\n技能提升价值高，能力增强前景好。",explanation:"投资自己是最好的投资。不断学习和成长，提升能力，未来会更好。",career:"学习新技能，提升竞争力。",wealth:"能力提升带来收入增长。",love:"自我成长让你更有魅力。",health:"学习健康知识，科学养生。",advice:"报培训班，读书学习。不断充实自己。终身学习，持续成长。",probability:10},
+            {id:33,level:"中吉签",type:"适度休息",poem:"张弛有度身心健，劳逸结合效率高。\n休息不是浪费时，充电之后再出发。",explanation:"提醒要注意休息，不要过度劳累。适当休息是为了更好地前进。",career:"工作重要，休息也重要，避免过劳。",wealth:"赚钱重要，健康更重要，量力而行。",love:"给彼此空间，不要太粘人。",health:"保证睡眠，定期休假，养精蓄锐。",advice:"劳逸结合，不要透支身体。定期休假放松。给自己充电时间。",probability:10},
+            {id:34,level:"中平签",type:"平淡是真",poem:"平平淡淡过一生，无风无浪亦安心。\n简单生活少烦恼，朴素真实见本心。",explanation:"生活平淡无奇，但也平平安安。没有大起大落，保持平常心，简单生活也是福。",career:"工作平稳，无升无降，维持现状。",wealth:"收支平衡，没有大笔进账也没有破财。",love:"感情平淡如水，细水长流。",health:"健康平稳，无病无痛。",advice:"保持平常心，不要强求。珍惜平凡生活，避免折腾。",probability:7},
+            {id:35,level:"中平签",type:"静观其变",poem:"暂且观望不宜动，静待时机再出手。\n动静之间有玄机，时机不对莫强求。",explanation:"现在不是行动的时候，需要静观其变。观察局势，等待更明朗再做决定。",career:"工作上不宜大动作，维持现状观察。",wealth:"投资暂缓，观望市场形势。",love:"感情暂时不要有大决定，再观察。",health:"身体无大碍，保持现有养生方式。",advice:"不要冲动行事，多观察少行动。等待更好时机。保持警惕。",probability:7},
+            {id:36,level:"中平签",type:"修养生息",poem:"春去秋来皆有时，种子休眠待春来。\n修养生息蓄能量,厚积薄发未来期。",explanation:"这是休养生息的时期，不是大展拳脚的时候。养精蓄锐，为未来做准备。",career:"职业低谷期，利用这段时间充电学习。",wealth:"财运平平，控制支出，储备资金。",love:"感情平淡期，各自提升自己。",health:"身体恢复期，注意调理养生。",advice:"不要强求发展，好好休息。利用闲暇时间学习。积蓄力量。",probability:7},
+            {id:37,level:"中平签",type:"量力而行",poem:"力所能及方能成，超出能力必受伤。\n认清自己量力行，稳扎稳打步步升。",explanation:"做事要量力而行,不要超出自己能力范围。认清现实，脚踏实地才是正道。",career:"不要接受超出能力的任务，量力而为。",wealth:"不要投资超过承受能力的项目。",love:"不要勉强感情，不合适就不要强求。",health:"运动要适量，不要过度。",advice:"认清自己的能力边界。不要好高骛远。稳健发展最重要。",probability:7},
+            {id:38,level:"中平签",type:"保持本分",poem:"守住本分不越界，安分守己少是非。\n不贪非分之财物，平安度日福自来。",explanation:"提醒守规矩，不要越界。安分守己，不贪心，才能平安顺遂。",career:"做好本职工作，不要越权或偷懒。",wealth:"合法赚钱，不要贪图非分之财。",love:"忠于伴侣，不要有非分之想。",health:"遵守医嘱，按时作息。",advice:"遵守规则，不要投机取巧。本分做人，踏实做事。知足常乐。",probability:7},
+            {id:39,level:"中平签",type:"顺其自然",poem:"强求不如顺自然，水到渠成莫心焦。\n随缘而行心自在，放下执念得安宁。",explanation:"不要强求，顺其自然最好。有些事强求不来，放松心态，顺势而为。",career:"职业发展顺其自然，不要过度焦虑。",wealth:"财运平平，顺其自然，不强求。",love:"感情随缘，不要执着，缘分到了自然来。",health:"身心放松，自然健康。",advice:"放下执念，随遇而安。不要控制欲太强。学会接受现实。",probability:7},
+            {id:40,level:"中平签",type:"沉淀积累",poem:"沉淀自己厚积累，量变质变需时日。\n埋头苦干莫浮躁，功到自然成大器。",explanation:"需要时间沉淀和积累，不要浮躁。默默努力，量变到质变需要过程。",career:"继续积累经验，暂时不会有大突破。",wealth:"财富慢慢积累，不要急于求成。",love:"感情需要时间培养，慢慢深入。",health:"身体调理需要时间，坚持养生。",advice:"戒骄戒躁，埋头苦干。相信积累的力量。给自己时间成长。",probability:7},
+            {id:41,level:"中签",type:"平常心态",poem:"不以物喜不悲己，平常心看世间事。\n得之我幸失我命，淡然处之心自宁。",explanation:"保持平常心最重要。不要因得失而大喜大悲，淡然面对生活起伏。",career:"工作有平有淡，以平常心对待。",wealth:"财来财去很正常，平常心看待。",love:"感情有起有伏，平常心经营。",health:"身体偶有小恙，平常心对待。",advice:"修炼平常心，不要情绪化。得失随缘，保持内心平静。",probability:5},
+            {id:42,level:"中签",type:"中庸之道",poem:"不偏不倚走中道，过犹不及需谨记。\n凡事适度为最佳，中庸之道是真谛。",explanation:"凡事讲究适度,不要走极端。中庸之道才是长久之计。",career:"工作不要太拼命也不要太懈怠。",wealth:"既不要守财奴也不要乱花钱。",love:"既不要太冷淡也不要太粘人。",health:"饮食运动都要适度，不要极端。",advice:"掌握分寸，凡事适度。避免极端思维和行为。平衡最重要。",probability:5},
+            {id:43,level:"中签",type:"默默耕耘",poem:"莫问收获且耕耘，付出自有回报时。\n埋头苦干不声张，低调做事高调心。",explanation:"默默努力，不要总想着回报。踏实做事，结果会自然呈现。",career:"认真工作，不要太计较得失。",wealth:"努力赚钱，不要总想着暴富。",love:"真心付出，不要总要求回报。",health:"坚持养生，不要急于见效。",advice:"少说多做，默默努力。不要太在意别人眼光。脚踏实地。",probability:5},
+            {id:44,level:"中签",type:"自我反省",poem:"吾日三省吾身心，错误及时需改正。\n反省自己找不足，改进提升路更宽。",explanation:"需要自我反省和改进。发现问题及时改正，才能不断进步。",career:"工作中找找自己的不足,改进提升。",wealth:"反思理财方式，调整策略。",love:"感情出问题先反省自己。",health:"检查生活习惯，改掉坏毛病。",advice:"经常自我反省，勇于改正错误。听取批评意见。持续改进。",probability:5},
+            {id:45,level:"中签",type:"化解矛盾",poem:"冤家宜解不宜结，矛盾化解福气来。\n放下成见握手言，海阔天空少烦恼。",explanation:"有矛盾需要化解，不要积怨。主动和解，放下成见，关系会改善。",career:"与同事有矛盾需要化解。",wealth:"合作纠纷要妥善处理。",love:"情侣吵架要主动和好。",health:"心结化解，心情会好转。",advice:"主动化解矛盾，不要冷战。宽容大度，退一步海阔天空。",probability:5},
+            {id:46,level:"下签",type:"小心谨慎",poem:"前路坎坷多险阻，步步小心防跌倒。\n谨言慎行避风险，暂时低调保平安。",explanation:"运势较弱，容易遇到困难。需要格外小心谨慎，避免冒险，低调行事。",career:"工作中可能遇到困难，小心应对。",wealth:"财运不佳，不要投资，守住现有。",love:"感情可能有摩擦，多沟通少争吵。",health:"注意身体，预防疾病，安全第一。",advice:"凡事谨慎，不要冒险。低调行事，避免出头。多请教他人。",probability:3},
+            {id:47,level:"下签",type:"暂避锋芒",poem:"时运不济暂低头，韬光养晦待时机。\n避其锋芒保实力，来日方长莫心急。",explanation:"运势低迷，不宜强出头。暂时低调，保存实力，等待时机转好。",career:"不宜争取晋升，暂时低调工作。",wealth:"不宜创业投资，守住资金为上。",love:"感情低谷，不宜谈婚论嫁。",health:"身体欠佳，多休息少操劳。",advice:"识时务者为俊杰，暂时低调。利用这段时间充电。等待转机。",probability:3},
+            {id:48,level:"下签",type:"困难重重",poem:"路遇荆棘多坎坷，困难重重需面对。\n坚持信念莫放弃，熬过难关见曙光。",explanation:"会遇到较多困难和阻碍。需要坚强面对，不要轻易放弃，困难会过去。",career:"工作压力大，任务困难，需要坚持。",wealth:"经济压力较大，开支需控制。",love:"感情遇到考验，需要共同面对。",health:"身体不适，需要治疗调理。",advice:"坚持就是胜利，不要放弃。寻求帮助，不要独自硬撑。相信困难会过去。",probability:3},
+            {id:49,level:"下下签",type:"诸事不顺",poem:"流年不利多波折，诸事不顺心烦闷。\n静心等待运势转，莫要强求添烦恼。",explanation:"运势最低谷，诸事不顺。不要强求任何事，静心等待运势好转。这是考验期。",career:"工作不顺，可能遇到重大挫折。",wealth:"破财之相，严格控制开支，不要投资。",love:"感情危机，可能面临分离。",health:"健康亮红灯，需要重视治疗。",advice:"停止所有冒险行为。多行善事,积累福报。静心修养,等待转运。",probability:2},
+            {id:50,level:"下下签",type:"静待转机",poem:"黑夜最深黎明近，苦尽甘来在眼前。\n守住初心莫动摇，否极泰来终有时。",explanation:"最困难的时期，但也预示转机将至。坚守信念，不要被困难打倒，黎明就在前方。",career:"职业最低谷，可能失业或降职。",wealth:"经济最困难，可能负债，需借助外力。",love:"感情破裂边缘，需要反思和努力。",health:"大病或意外，需要认真对待。",advice:"这是人生考验，咬牙坚持。多求助亲友，不要独自承受。行善积德,反省改过。坚信会好转。",probability:1}
+        ];
 
-        // 随机打乱数组
-        function shuffleArray(array) {
-            const shuffled = [...array];
-            for (let i = shuffled.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        // ====== 全局变量 ======
+        let currentFortune = null;
+        let currentUserName = '';
+        let isAnonymous = false;
+
+        // ====== 烟花动画 ======
+        const canvas = document.getElementById('fireworks');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        let particles = [];
+
+        function createFirework() {
+            if (Math.random() < 0.03) {
+                const x = Math.random() * canvas.width;
+                const y = Math.random() * canvas.height / 2;
+                const color = ['#FFD700', '#FF6347', '#FF69B4', '#FFA500'][Math.floor(Math.random() * 4)];
+                for (let i = 0; i < 30; i++) {
+                    particles.push({
+                        x: x, y: y,
+                        vx: (Math.random() - 0.5) * 5,
+                        vy: (Math.random() - 0.5) * 5,
+                        life: 100,
+                        color: color
+                    });
+                }
             }
-            return shuffled;
         }
 
-        // 初始化
-        function init() {
-            loadHistory();
-            updateStartStats();
-        }
-
-        // 加载历史记录
-        function loadHistory() {
-            const saved = localStorage.getItem('pigeonTestHistory');
-            if (saved) {
-                testHistory = JSON.parse(saved);
-            }
-        }
-
-        // 保存历史记录
-        function saveHistory() {
-            localStorage.setItem('pigeonTestHistory', JSON.stringify(testHistory));
-        }
-
-        // 更新开始界面统计
-        function updateStartStats() {
-            const totalTests = testHistory.length;
-            const avgLevel = totalTests > 0 
-                ? (testHistory.reduce((sum, item) => sum + item.level, 0) / totalTests).toFixed(1)
-                : '-';
-            
-            document.getElementById('totalTests').textContent = totalTests;
-            document.getElementById('avgLevel').textContent = avgLevel;
-        }
-
-        // 开始测试
-        function startTest() {
-            currentQuestion = 0;
-            totalScore = 0;
-            // 随机打乱题目顺序
-            shuffledQuestions = shuffleArray(questions);
-            document.querySelector('.start-screen').classList.remove('active');
-            document.querySelector('.question-screen').classList.add('active');
-            showQuestion();
-        }
-
-        // 显示问题
-        function showQuestion() {
-            const question = shuffledQuestions[currentQuestion];
-            document.getElementById('questionText').textContent = `${currentQuestion + 1}. ${question.question}`;
-            
-            const optionsContainer = document.getElementById('optionsContainer');
-            optionsContainer.innerHTML = '';
-            
-            // 随机打乱选项顺序
-            const shuffledOptions = shuffleArray(question.options);
-            
-            shuffledOptions.forEach((option, index) => {
-                const optionDiv = document.createElement('div');
-                optionDiv.className = 'option';
-                optionDiv.textContent = option.text;
-                optionDiv.onclick = () => selectOption(option.score);
-                optionsContainer.appendChild(optionDiv);
+        function updateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles = particles.filter(p => p.life > 0);
+            particles.forEach(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.1;
+                p.life -= 2;
+                ctx.fillStyle = p.color;
+                ctx.globalAlpha = p.life / 100;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+                ctx.fill();
             });
-            
-            // 更新进度条
-            const progress = ((currentQuestion + 1) / questions.length) * 100;
-            document.getElementById('progressBar').style.width = progress + '%';
+            ctx.globalAlpha = 1;
         }
 
-        // 选择选项
-        function selectOption(score) {
-            totalScore += score;
-            currentQuestion++;
-            
-            if (currentQuestion < questions.length) {
-                showQuestion();
-            } else {
-                showResult();
+        function animate() {
+            createFirework();
+            updateParticles();
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        // ====== 工具函数 ======
+        function getWeightedFortune() {
+            const pool = [];
+            fortunes.forEach(f => {
+                for (let i = 0; i < f.probability; i++) {
+                    pool.push(f);
+                }
+            });
+            return pool[Math.floor(Math.random() * pool.length)];
+        }
+
+        function maskName(name) {
+            if (name.length <= 1) return name;
+            return name[0] + '*'.repeat(name.length - 1);
+        }
+
+        function formatTime(date) {
+            const y = date.getFullYear();
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            const d = String(date.getDate()).padStart(2, '0');
+            const h = String(date.getHours()).padStart(2, '0');
+            const min = String(date.getMinutes()).padStart(2, '0');
+            return `${y}-${m}-${d} ${h}:${min}`;
+        }
+
+        // ====== 抽签逻辑 ======
+        function startDraw() {
+            const userName = document.getElementById('userName').value.trim();
+            if (!userName) {
+                alert('请先输入您的姓名哦！🎋');
+                return;
             }
+            isAnonymous = document.getElementById('anonymous').checked;
+            currentUserName = userName;
+            
+            document.getElementById('inputSection').style.display = 'none';
+            document.getElementById('drawingAnimation').style.display = 'block';
+            
+            setTimeout(() => showResult(), 2000);
         }
 
-        // 显示结果
         function showResult() {
-            document.querySelector('.question-screen').classList.remove('active');
-            document.querySelector('.result-screen').classList.add('active');
+            currentFortune = getWeightedFortune();
+            const displayName = isAnonymous ? '匿名善信' : currentUserName;
             
-            // 计算等级
-            let level;
-            if (totalScore <= 20) level = 1;
-            else if (totalScore <= 40) level = 2;
-            else if (totalScore <= 60) level = 3;
-            else if (totalScore <= 80) level = 4;
-            else level = 5;
+            document.getElementById('fortuneTitle').textContent = `${displayName} 抽得：${currentFortune.level}`;
+            document.getElementById('fortuneType').textContent = `【 ${currentFortune.type} 】`;
+            document.getElementById('fortunePoem').textContent = currentFortune.poem;
+            document.getElementById('fortuneExplanation').textContent = currentFortune.explanation;
+            document.getElementById('fortuneAdvice').textContent = currentFortune.advice;
             
-            const insult = insults[level];
-            const levelDiv = document.getElementById('pigeonLevel');
-            levelDiv.textContent = insult.title;
-            levelDiv.className = `pigeon-level level-${level}`;
-            
-            document.getElementById('insultText').innerHTML = `
-                ${insult.emoji} ${insult.text} ${insult.emoji}
-                <br><br>
-                <strong>你的得分：${totalScore} / 80</strong>
+            const aspectsHTML = `
+                <div class="aspect-card"><h4>💼 事业运</h4><p>${currentFortune.career}</p></div>
+                <div class="aspect-card"><h4>💰 财运</h4><p>${currentFortune.wealth}</p></div>
+                <div class="aspect-card"><h4>💕 感情运</h4><p>${currentFortune.love}</p></div>
+                <div class="aspect-card"><h4>🏥 健康运</h4><p>${currentFortune.health}</p></div>
             `;
+            document.getElementById('fortuneAspects').innerHTML = aspectsHTML;
             
-            // 触发掉落动画
-            if (level >= 3) {
-                triggerFallingAnimation(level);
-            }
+            document.getElementById('drawingAnimation').style.display = 'none';
+            document.getElementById('resultSection').style.display = 'block';
             
-            // 保存到历史
-            const result = {
-                date: new Date().toLocaleString('zh-CN'),
-                score: totalScore,
-                level: level,
-                title: insult.title
-            };
-            testHistory.unshift(result);
-            if (testHistory.length > 10) {
-                testHistory = testHistory.slice(0, 10);
-            }
-            saveHistory();
+            saveToGitHub();
         }
 
-        // 触发掉落动画
-        function triggerFallingAnimation(level) {
-            const items = level === 3 ? ['🥚'] : level === 4 ? ['🥚', '🍅'] : ['🥚', '🍅', '💩'];
-            const count = level * 3;
+        function resetDraw() {
+            document.getElementById('resultSection').style.display = 'none';
+            document.getElementById('inputSection').style.display = 'block';
+            document.getElementById('userName').value = '';
+            document.getElementById('blessing').value = '';
+            document.getElementById('anonymous').checked = false;
+            document.getElementById('userName').focus();
+        }
+
+        // ====== GitHub Issues 数据持久化 ======
+        async function saveToGitHub() {
+            if (!CONFIG.token) {
+                console.log('未配置GitHub Token，跳过保存');
+                return;
+            }
+
+            const blessing = document.getElementById('blessing').value.trim();
+            const displayName = isAnonymous ? '匿名善信' : maskName(currentUserName);
+            const title = `${displayName} - ${currentFortune.level} - ${formatTime(new Date())}`;
+            const body = `**姓名**: ${displayName}
+**签文**: ${currentFortune.level} - ${currentFortune.type}
+**时间**: ${formatTime(new Date())}
+
+**签诗**:
+${currentFortune.poem}
+
+**解析**: ${currentFortune.explanation}
+
+${blessing ? `**祝福**: ${blessing}
+` : ''}---
+🏮 新春祈福抽签 🏮`;
+
+            try {
+                await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/issues`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `token ${CONFIG.token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        title: title,
+                        body: body,
+                        labels: ['新春抽签', '龙年祈福']
+                    })
+                });
+                loadVisitors();
+            } catch (e) {
+                console.error('保存失败:', e);
+            }
+        }
+
+        async function loadVisitors() {
+            const loading = document.getElementById('wallLoading');
+            const list = document.getElementById('visitorList');
             
-            for (let i = 0; i < count; i++) {
-                setTimeout(() => {
-                    const item = document.createElement('div');
-                    item.className = 'falling-item';
-                    item.textContent = items[Math.floor(Math.random() * items.length)];
-                    item.style.left = Math.random() * 100 + '%';
-                    item.style.animationDelay = Math.random() * 0.5 + 's';
-                    document.body.appendChild(item);
+            try {
+                const res = await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/issues?labels=新春抽签&state=all&per_page=20&sort=created&direction=desc`);
+                const issues = await res.json();
+                
+                loading.style.display = 'none';
+                
+                if (issues.length === 0) {
+                    list.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">暂无访客记录</p>';
+                    return;
+                }
+                
+                let stats = { total: issues.length, lucky: 0 };
+                
+                list.innerHTML = issues.map(issue => {
+                    const match = issue.title.match(/(.*?)\s-\s(.*?)\s-\s(.*)/);
+                    if (!match) return '';
                     
-                    setTimeout(() => item.remove(), 3000);
-                }, i * 200);
+                    const name = match[1];
+                    const fortune = match[2];
+                    const time = match[3];
+                    
+                    if (fortune.includes('上吉签') || fortune.includes('上上签')) {
+                        stats.lucky++;
+                    }
+                    
+                    const blessingMatch = issue.body.match(/\*\*祝福\*\*:\s*(.+)/);
+                    const blessing = blessingMatch ? blessingMatch[1] : '';
+                    
+                    return `
+                        <div class="visitor-item">
+                            <div class="visitor-name">${name}</div>
+                            <div class="visitor-fortune">${fortune}</div>
+                            <div class="visitor-time">🕐 ${time}</div>
+                            ${blessing ? `<div class="visitor-blessing">💬 ${blessing}</div>` : ''}
+                        </div>
+                    `;
+                }).join('');
+                
+                document.getElementById('totalCount').textContent = stats.total;
+                document.getElementById('luckyCount').textContent = stats.lucky;
+                document.getElementById('visitorCount').textContent = stats.total;
+                
+            } catch (e) {
+                loading.style.display = 'none';
+                list.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">加载失败，请稍后再试</p>';
+                console.error('加载失败:', e);
             }
         }
 
-        // 显示历史记录
-        function showHistory() {
-            const modal = document.getElementById('historyModal');
-            const historyList = document.getElementById('historyList');
-            
-            if (testHistory.length === 0) {
-                historyList.innerHTML = '<p style="text-align: center; color: #666;">暂无测试记录</p>';
-            } else {
-                historyList.innerHTML = testHistory.map((item, index) => `
-                    <div class="history-item">
-                        <strong>${item.date}</strong><br>
-                        ${item.title} - 得分：${item.score}
-                    </div>
-                `).join('');
-            }
-            
-            modal.style.display = 'flex';
-        }
-
-        // 关闭历史记录
-        function closeHistory() {
-            document.getElementById('historyModal').style.display = 'none';
-        }
-
-        // 重新测试
-        function restartTest() {
-            document.querySelector('.result-screen').classList.remove('active');
-            document.querySelector('.start-screen').classList.add('active');
-            updateStartStats();
-        }
-
-        // 页面加载完成后初始化
-        window.onload = init;
+        // ====== 页面加载时初始化 ======
+        window.addEventListener('DOMContentLoaded', () => {
+            loadVisitors();
+        });
     </script>
 </body>
 </html>
