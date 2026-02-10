@@ -323,6 +323,10 @@
 
         // ====== GitHub Issues 数据持久化 ======
         async function saveToGitHub() {
+            console.log('=== 开始保存到GitHub ===');
+            console.log('Token状态:', CONFIG.token ? '已配置' : '未配置');
+            console.log('Token长度:', CONFIG.token ? CONFIG.token.length : 0);
+            
             if (!CONFIG.token) {
                 console.log('未配置GitHub Token，跳过保存');
                 document.getElementById('tokenError').style.display = 'block';
@@ -345,7 +349,13 @@ ${blessing ? `**祝福**: ${blessing}
 ` : ''}---
 🏮 新春祈福抽签 🏮`;
 
+            console.log('准备创建Issue:');
+            console.log('  标题:', title);
+            console.log('  姓名:', currentUserName);
+            console.log('  签文:', currentFortune.level, '-', currentFortune.type);
+
             try {
+                console.log('发送请求到GitHub API...');
                 const response = await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/issues`, {
                     method: 'POST',
                     headers: {
@@ -358,6 +368,8 @@ ${blessing ? `**祝福**: ${blessing}
                         labels: ['新春抽签', '龙年祈福']
                     })
                 });
+                
+                console.log('API响应状态:', response.status, response.statusText);
                 
                 if (!response.ok) {
                     const errorData = await response.json();
@@ -373,7 +385,15 @@ ${blessing ? `**祝福**: ${blessing}
                     return;
                 }
                 
-                console.log('保存成功！');
+                const result = await response.json();
+                console.log('✅ 保存成功！Issue URL:', result.html_url);
+                console.log('Issue编号:', result.number);
+                
+                // 显示成功提示
+                setTimeout(() => {
+                    alert('✅ 抽签记录已保存！\n\n您的签文已记录在访客祈福墙上\ud83c�');
+                }, 500);
+                
                 loadVisitors();
             } catch (e) {
                 console.error('保存失败:', e);
